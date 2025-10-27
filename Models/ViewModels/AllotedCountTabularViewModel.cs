@@ -7,7 +7,20 @@ namespace bhati_jatha_count_report.Models.ViewModels
 {
   public class AllotedCountTabularViewModel
   {
-    public List<Center> Centers { get; set; } = new();
+    private List<Center> _centers = new();
+    public List<Center> Centers
+    {
+      get
+      {
+        var centerIdsWithCount = AllotedCounts
+          .Where(x => (int)x.WeekDay == SelectedWeekDay && x.Count > 0)
+          .Select(x => x.CenterId)
+          .Distinct()
+          .ToHashSet();
+        return _centers.Where(c => centerIdsWithCount.Contains(c.Id)).ToList();
+      }
+      set { _centers = value; }
+    }
     public List<SewaType> SewaTypes { get; set; } = new();
     public List<AllotedCount> AllotedCounts { get; set; } = new();
     public int SelectedWeekDay { get; set; }
