@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bhati-jatha-count-report", "bhati-jatha-count-report.csproj", "{208FC2B8-7EF9-5258-E0AA-95D611E59F48}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{208FC2B8-7EF9-5258-E0AA-95D611E59F48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{208FC2B8-7EF9-5258-E0AA-95D611E59F48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{208FC2B8-7EF9-5258-E0AA-95D611E59F48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{208FC2B8-7EF9-5258-E0AA-95D611E59F48}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF84C3C7-6B90-4E0E-A748-2E7BA8F2F335}
+	EndGlobalSection
+EndGlobal
