@@ -12,10 +12,9 @@ public class ApplicationDbContext : DbContext
 
   public DbSet<Center> Centers { get; set; }
   public DbSet<SewaType> SewaTypes { get; set; }
-
   public DbSet<SewaNominalRoll> SewaNominalRolls { get; set; }
-
   public DbSet<DailyActualCount> DailyActualCounts { get; set; }
+  public DbSet<AllotedCount> AllotedCounts { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -45,6 +44,22 @@ public class ApplicationDbContext : DbContext
       entity.Property(e => e.SewaTypeId).IsRequired();
       entity.Property(e => e.Count).IsRequired();
       entity.Property(e => e.NominalRollToken).IsRequired().HasMaxLength(100);
+
+      entity.HasOne(e => e.Center)
+        .WithMany()
+        .HasForeignKey(e => e.CenterId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+      entity.HasOne(e => e.SewaType)
+        .WithMany()
+        .HasForeignKey(e => e.SewaTypeId)
+        .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<AllotedCount>(entity =>
+    {
+      entity.HasKey(e => new { e.WeekDay, e.CenterId, e.SewaTypeId });
+      entity.Property(e => e.Count).IsRequired();
 
       entity.HasOne(e => e.Center)
         .WithMany()

@@ -13,6 +13,7 @@ builder.Services.AddScoped<ICenterService, CenterService>();
 builder.Services.AddScoped<ISewaTypeService, SewaTypeService>();
 builder.Services.AddScoped<ISewaNominalRollService, SewaNominalRollService>();
 builder.Services.AddScoped<IDailyActualCountService, DailyActualCountService>();
+builder.Services.AddScoped<IAllotedCountService, AllotedCountService>();
 
 // Add DbContext configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
