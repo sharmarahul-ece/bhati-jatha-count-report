@@ -1,10 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using bhati_jatha_count_report.Data;
+using bhati_jatha_count_report.Services.Interfaces;
+using bhati_jatha_count_report.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Register services
+builder.Services.AddScoped<ICenterService, CenterService>();
 
 // Add DbContext configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
