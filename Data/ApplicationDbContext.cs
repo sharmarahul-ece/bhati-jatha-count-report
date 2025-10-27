@@ -15,6 +15,8 @@ public class ApplicationDbContext : DbContext
 
   public DbSet<SewaNominalRoll> SewaNominalRolls { get; set; }
 
+  public DbSet<DailyActualCount> DailyActualCounts { get; set; }
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
@@ -32,6 +34,27 @@ public class ApplicationDbContext : DbContext
       entity.HasKey(e => new { e.NominalRollToken, e.SewaDate });
       entity.Property(e => e.CreatedAt)
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
+    });
+
+    modelBuilder.Entity<DailyActualCount>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+      entity.Property(e => e.Id).ValueGeneratedOnAdd();
+      entity.Property(e => e.Date).IsRequired();
+      entity.Property(e => e.CenterId).IsRequired();
+      entity.Property(e => e.SewaTypeId).IsRequired();
+      entity.Property(e => e.Count).IsRequired();
+      entity.Property(e => e.NominalRollToken).IsRequired().HasMaxLength(100);
+
+      entity.HasOne(e => e.Center)
+        .WithMany()
+        .HasForeignKey(e => e.CenterId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+      entity.HasOne(e => e.SewaType)
+        .WithMany()
+        .HasForeignKey(e => e.SewaTypeId)
+        .OnDelete(DeleteBehavior.Restrict);
     });
   }
 }

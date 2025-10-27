@@ -1,0 +1,270 @@
+@model bhati_jatha_count_report.Models.ViewModels.DailyActualCountPageViewModel
+@{
+  ViewData["Title"] = "Manage Daily Actual Counts";
+}
+<div class="container">
+  <h2 class="mb-4">Manage Daily Actual Counts</h2>
+  <div class="row mb-3 align-items-end">
+    <div class="col-md-2">
+      <label for="filterCenter" class="form-label">Center</label>
+      <select id="filterCenter" class="form-select">
+        <option value="">All</option>
+        @foreach (var c in Model.Centers)
+        {
+          <option value="@c.Id">@c.CenterName</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label for="filterSewaType" class="form-label">Sewa Type</label>
+      <select id="filterSewaType" class="form-select">
+        <option value="">All</option>
+        @foreach (var s in Model.SewaTypes)
+        {
+          <option value="@s.Id">@s.SewaName</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="filterDateFrom" class="form-label">Date From</label>
+      <input type="date" id="filterDateFrom" class="form-control" />
+    </div>
+    <div class="col-md-3">
+      <label for="filterDateTo" class="form-label">Date To</label>
+      <input type="date" id="filterDateTo" class="form-control" />
+    </div>
+    <div class="col-md-2 d-flex flex-column gap-2">
+      <button type="button" class="btn btn-success w-100 mb-2" id="applyFiltersBtn">
+        <i class="bi bi-funnel"></i> Apply Filters
+      </button>
+      <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#dacModal" onclick="resetForm()">
+        <i class="bi bi-plus-circle"></i> Add Record
+      </button>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover" id="dacTable">
+      <thead class="table-light">
+        <tr>
+          <th>Date</th>
+          <th>Center</th>
+          <th>Sewa Type</th>
+          <th>Count</th>
+          <th>Nominal Roll Token</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="dacTableBody">
+        <!-- Rows will be rendered by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="dacModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Add Record</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="dacForm">
+            <input type="hidden" id="dacId" />
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+              <label for="dacDate" class="form-label">Date</label>
+              <input type="date" class="form-control" id="dacDate" required />
+            </div>
+            <div class="mb-3">
+              <label for="dacCenterId" class="form-label">Center</label>
+              <select class="form-select" id="dacCenterId" required>
+                <option value="">Select Center</option>
+                @foreach (var c in Model.Centers)
+                {
+                  <option value="@c.Id">@c.CenterName</option>
+                }
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="dacSewaTypeId" class="form-label">Sewa Type</label>
+              <select class="form-select" id="dacSewaTypeId" required>
+                <option value="">Select Sewa Type</option>
+                @foreach (var s in Model.SewaTypes)
+                {
+                  <option value="@s.Id">@s.SewaName</option>
+                }
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="dacCount" class="form-label">Count</label>
+              <input type="number" class="form-control" id="dacCount" required />
+            </div>
+            <div class="mb-3">
+              <label for="dacNominalRollToken" class="form-label">Nominal Roll Token</label>
+              <textarea class="form-control" id="dacNominalRollToken" rows="3" required></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="saveDac()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    let isEditing = false;
+    let dacData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyActualCounts));
+    function resetForm() {
+      isEditing = false;
+      document.getElementById('dacForm').reset();
+      document.getElementById('dacId').value = '';
+      // Set date to today if empty
+      const dateInput = document.getElementById('dacDate');
+      if (!dateInput.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+      document.getElementById('modalTitle').textContent = 'Add Record';
+    }
+
+    // --- Filtering logic ---
+    const centers = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Centers));
+    const sewaTypes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SewaTypes));
+
+    function renderTable(data) {
+      const tbody = document.getElementById('dacTableBody');
+      tbody.innerHTML = '';
+      data.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-id', item.id);
+        tr.innerHTML = `
+                <td>${item.date.substring(0, 10)}</td>
+                <td>${centers.find(c => c.id === item.centerId)?.centerName || ''}</td>
+                <td>${sewaTypes.find(s => s.id === item.sewaTypeId)?.sewaName || ''}</td>
+                <td>${item.count}</td>
+                <td>${item.nominalRollToken}</td>
+                <td>
+                  <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
+                    <i class="bi bi-pencil"></i> Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
+                    <i class="bi bi-trash"></i> Delete
+                  </button>
+                </td>
+              `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterData() {
+      const centerId = document.getElementById('filterCenter').value;
+      const sewaTypeId = document.getElementById('filterSewaType').value;
+      const dateFrom = document.getElementById('filterDateFrom').value;
+      const dateTo = document.getElementById('filterDateTo').value;
+
+      let url = '/DailyActualCount/GetFiltered?';
+      if (dateFrom) url += `fromDate=${dateFrom}&`;
+      if (dateTo) url += `toDate=${dateTo}&`;
+      if (centerId) url += `centerId=${centerId}&`;
+      if (sewaTypeId) url += `sewaTypeId=${sewaTypeId}`;
+
+      fetch(url)
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            dacData = res.data; // Update the local data
+            renderTable(res.data);
+          } else {
+            alert('Error loading filtered data');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('Error loading filtered data');
+        });
+    }
+
+    // Set default date filter to today, but show all data initially
+    window.addEventListener('DOMContentLoaded', () => {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${yyyy}-${mm}-${dd}`;
+
+      document.getElementById('filterDateFrom').value = todayStr;
+      document.getElementById('filterDateTo').value = todayStr;
+
+      filterData();
+    });
+
+    document.getElementById('applyFiltersBtn').addEventListener('click', filterData);
+    document.querySelector('#dacTable').addEventListener('click', function (e) {
+      if (e.target.closest('.edit-dac-btn')) {
+        const id = e.target.closest('.edit-dac-btn').dataset.id;
+        fetch(`/DailyActualCount/Get/${id}`)
+          .then(r => r.json())
+          .then(res => {
+            if (res.success) {
+              const d = res.data;
+              document.getElementById('dacId').value = d.id;
+              document.getElementById('dacDate').value = d.date ? d.date.substring(0, 10) : '';
+              document.getElementById('dacCenterId').value = d.centerId;
+              document.getElementById('dacSewaTypeId').value = d.sewaTypeId;
+              document.getElementById('dacCount').value = d.count;
+              document.getElementById('dacNominalRollToken').value = d.nominalRollToken;
+              document.getElementById('modalTitle').textContent = 'Edit Record';
+              new bootstrap.Modal(document.getElementById('dacModal')).show();
+            }
+          });
+      }
+      if (e.target.closest('.delete-dac-btn')) {
+        const id = e.target.closest('.delete-dac-btn').dataset.id;
+        if (confirm('Are you sure you want to delete this record?')) {
+          const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+          fetch(`/DailyActualCount/Delete/${id}`, {
+            method: 'DELETE',
+            headers: { 'RequestVerificationToken': token }
+          })
+            .then(r => r.json())
+            .then(res => {
+              if (res.success) window.location.reload();
+              else alert(res.message);
+            });
+        }
+      }
+    });
+    function saveDac() {
+      const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+      const data = {
+        Id: document.getElementById('dacId').value || 0,
+        Date: document.getElementById('dacDate').value,
+        CenterId: document.getElementById('dacCenterId').value,
+        SewaTypeId: document.getElementById('dacSewaTypeId').value,
+        Count: document.getElementById('dacCount').value,
+        NominalRollToken: document.getElementById('dacNominalRollToken').value
+      };
+      fetch('/DailyActualCount/Save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'RequestVerificationToken': token
+        },
+        body: JSON.stringify(data)
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) window.location.reload();
+          else alert(res.message);
+        });
+    }
+  </script>
+}

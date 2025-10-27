@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using bhati_jatha_count_report.Data;
 
@@ -10,9 +11,11 @@ using bhati_jatha_count_report.Data;
 namespace bhati_jatha_count_report.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251027075249_AddDailyActualCount")]
+    partial class AddDailyActualCount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -57,6 +60,9 @@ namespace bhati_jatha_count_report.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("SewaTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TokenNumber")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
