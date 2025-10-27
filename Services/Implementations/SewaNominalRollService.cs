@@ -22,7 +22,10 @@ public class SewaNominalRollService : ISewaNominalRollService
     using var workbook = new XLWorkbook(excelPath);
     var worksheet = workbook.Worksheets.First();
     var firstDataRow = 3;
-    var lastDataRow = worksheet.LastRowUsed().RowNumber();
+    var lastRow = worksheet.LastRowUsed();
+    if (lastRow == null)
+      throw new InvalidOperationException("No data rows found in worksheet.");
+    var lastDataRow = lastRow.RowNumber();
 
     var validationErrors = new List<string>();
 
@@ -32,7 +35,7 @@ public class SewaNominalRollService : ISewaNominalRollService
 
       var nominalRollToken = row.Cell(1).GetString().Trim();
       var sewaDate = ParseDate(row.Cell(8).GetString());
-      var sewaName = row.Cell(3).GetString();
+      var sewaName = row.Cell(3).GetString() ?? string.Empty;
       // Only import rows matching the desired SewaName
       if (!string.Equals(sewaName?.Trim(), "MAJOR CENTRE - BHATI DELHI", StringComparison.OrdinalIgnoreCase))
       {
@@ -57,20 +60,20 @@ public class SewaNominalRollService : ISewaNominalRollService
       {
         NominalRollToken = nominalRollToken,
         SewaDate = sewaDate,
-        SewaName = sewaName,
-        Department = department,
-        Zone = zone,
-        CentreName = centreName,
+        SewaName = sewaName ?? string.Empty,
+        Department = department ?? string.Empty,
+        Zone = zone ?? string.Empty,
+        CentreName = centreName ?? string.Empty,
         JourneyDate = journeyDate,
         SewaDuration = sewaDuration,
         Males = males,
         Females = females,
         TotalSewadars = totalSewadars,
-        SewaType = sewaType,
-        SewaStartTime = sewaStartTime,
-        InchargeName = inchargeName,
-        InchargeContact = inchargeContact,
-        Remarks = remarks
+        SewaType = sewaType ?? string.Empty,
+        SewaStartTime = sewaStartTime ?? string.Empty,
+        InchargeName = inchargeName ?? string.Empty,
+        InchargeContact = inchargeContact ?? string.Empty,
+        Remarks = remarks ?? string.Empty
         // CreatedAt will be set automatically by the database
       };
 
@@ -94,7 +97,7 @@ public class SewaNominalRollService : ISewaNominalRollService
 
       // Upsert logic
       var dbEntity = _context.Set<SewaNominalRoll>()
-          .SingleOrDefault(x => x.NominalRollToken == nominalRollToken && x.SewaDate == sewaDate);
+        .SingleOrDefault(x => x.NominalRollToken == nominalRollToken && x.SewaDate == sewaDate);
 
       if (dbEntity == null)
       {
@@ -102,23 +105,23 @@ public class SewaNominalRollService : ISewaNominalRollService
       }
       else
       {
-        // Update relevant fields
-        dbEntity.SewaName = sewaName;
-        dbEntity.Department = department;
-        dbEntity.Zone = zone;
-        dbEntity.CentreName = centreName;
+        // Update relevant fields, using null-coalescing for strings
+        dbEntity.SewaName = sewaName ?? string.Empty;
+        dbEntity.Department = department ?? string.Empty;
+        dbEntity.Zone = zone ?? string.Empty;
+        dbEntity.CentreName = centreName ?? string.Empty;
         dbEntity.JourneyDate = journeyDate;
         dbEntity.SewaDuration = sewaDuration;
         dbEntity.Males = males;
         dbEntity.Females = females;
         dbEntity.TotalSewadars = totalSewadars;
-        dbEntity.SewaType = sewaType;
-        dbEntity.SewaStartTime = sewaStartTime;
-        dbEntity.InchargeName = inchargeName;
-        dbEntity.InchargeContact = inchargeContact;
-        dbEntity.Remarks = remarks;
+        dbEntity.SewaType = sewaType ?? string.Empty;
+        dbEntity.SewaStartTime = sewaStartTime ?? string.Empty;
+        dbEntity.InchargeName = inchargeName ?? string.Empty;
+        dbEntity.InchargeContact = inchargeContact ?? string.Empty;
+        dbEntity.Remarks = remarks ?? string.Empty;
         // update source file name if reprocessed
-        dbEntity.SourceFileName = sourceFileName;
+        dbEntity.SourceFileName = sourceFileName ?? string.Empty;
       }
     }
 

@@ -81,5 +81,30 @@ namespace bhati_jatha_count_report.Controllers
 
       return Json(new { success = true, data = entity });
     }
+    [HttpGet]
+    public async Task<IActionResult> Tabular(int? weekDay)
+    {
+      var centers = (await _centerService.GetAllCentersAsync()).ToList();
+      var sewaTypes = (await _sewaTypeService.GetAllSewaTypesAsync()).ToList();
+      var allotedCounts = _service.GetAll().ToList();
+      int selectedWeekDay = weekDay ?? 0;
+      var weekDays = System.Enum.GetValues(typeof(WeekDay))
+        .Cast<WeekDay>()
+        .Select(wd => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+          Value = ((int)wd).ToString(),
+          Text = wd.ToString()
+        }).ToList();
+
+      var vm = new Models.ViewModels.AllotedCountTabularViewModel
+      {
+        Centers = centers,
+        SewaTypes = sewaTypes,
+        AllotedCounts = allotedCounts.Where(x => (int)x.WeekDay == selectedWeekDay).ToList(),
+        SelectedWeekDay = selectedWeekDay,
+        WeekDays = weekDays
+      };
+      return View(vm);
+    }
   }
 }

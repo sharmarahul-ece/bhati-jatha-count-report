@@ -1,0 +1,47 @@
+@model bhati_jatha_count_report.Models.ViewModels.AllotedCountTabularViewModel
+@{
+    ViewData["Title"] = "Alloted Count Tabular View";
+}
+<div class="container-fluid">
+    <h2 class="mb-4">Alloted Count - Tabular View</h2>
+    <form method="get" class="mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label for="weekDay" class="form-label">Week Day</label>
+                <select class="form-select" id="weekDay" name="weekDay" onchange="this.form.submit()">
+                    @foreach (var wd in Model.WeekDays)
+                    {
+                        var selected = wd.Value == Model.SelectedWeekDay.ToString() ? "selected" : null;
+                        <option value="@wd.Value" selected="@selected">@wd.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </form>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Center \ Sewa Type</th>
+                    @foreach (var sewaType in Model.SewaTypes)
+                    {
+                        <th>@sewaType.SewaName</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var center in Model.Centers)
+                {
+                    <tr>
+                        <th>@center.CenterName</th>
+                        @foreach (var sewaType in Model.SewaTypes)
+                        {
+                            var count = Model.GetAllotedCount(center.Id, sewaType.Id);
+                            <td>@(count.HasValue ? count.Value.ToString() : "-")</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -89,6 +89,7 @@
 
 @section Scripts {
   <script>
+    // Serialized objects from server use PascalCase property names (e.g. WeekDay, CenterId, Count).
     let allotedCountData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AllotedCounts));
     const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const centers = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Centers));
@@ -104,22 +105,27 @@
       tbody.innerHTML = '';
       allotedCountData.forEach(item => {
         const tr = document.createElement('tr');
+        // Use PascalCase properties as serialized by System.Text.Json
+        const wd = item.WeekDay;
+        const center = centers.find(c => c.Id === item.CenterId);
+        const sewa = sewaTypes.find(s => s.Id === item.SewaTypeId);
+
         tr.innerHTML = `
-          <td>${weekDays[item.weekDay]}</td>
-          <td>${centers.find(c => c.id === item.centerId)?.centerName || ''}</td>
-          <td>${sewaTypes.find(s => s.id === item.sewaTypeId)?.sewaName || ''}</td>
-          <td>${item.count}</td>
-          <td>
-            <button class="btn btn-sm btn-primary me-2 edit-btn" data-weekday="${item.weekDay}" 
-                    data-center="${item.centerId}" data-sewa="${item.sewaTypeId}">
-              <i class="bi bi-pencil"></i> Edit
-            </button>
-            <button class="btn btn-sm btn-danger delete-btn" data-weekday="${item.weekDay}" 
-                    data-center="${item.centerId}" data-sewa="${item.sewaTypeId}">
-              <i class="bi bi-trash"></i> Delete
-            </button>
-          </td>
-        `;
+            <td>${weekDays[wd]}</td>
+            <td>${center ? center.CenterName : ''}</td>
+            <td>${sewa ? sewa.SewaName : ''}</td>
+            <td>${item.Count}</td>
+            <td>
+              <button class="btn btn-sm btn-primary me-2 edit-btn" data-weekday="${item.WeekDay}" 
+                      data-center="${item.CenterId}" data-sewa="${item.SewaTypeId}">
+                <i class="bi bi-pencil"></i> Edit
+              </button>
+              <button class="btn btn-sm btn-danger delete-btn" data-weekday="${item.WeekDay}" 
+                      data-center="${item.CenterId}" data-sewa="${item.SewaTypeId}">
+                <i class="bi bi-trash"></i> Delete
+              </button>
+            </td>
+          `;
         tbody.appendChild(tr);
       });
     }
@@ -160,10 +166,11 @@
           .then(res => {
             if (res.success) {
               const d = res.data;
-              document.getElementById('weekDay').value = d.weekDay;
-              document.getElementById('centerId').value = d.centerId;
-              document.getElementById('sewaTypeId').value = d.sewaTypeId;
-              document.getElementById('count').value = d.count;
+              // use PascalCase fields from server
+              document.getElementById('weekDay').value = d.WeekDay;
+              document.getElementById('centerId').value = d.CenterId;
+              document.getElementById('sewaTypeId').value = d.SewaTypeId;
+              document.getElementById('count').value = d.Count;
               document.getElementById('modalTitle').textContent = 'Edit Record';
               new bootstrap.Modal(document.getElementById('allotedCountModal')).show();
             }
