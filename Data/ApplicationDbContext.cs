@@ -11,6 +11,7 @@ public class ApplicationDbContext : DbContext
   }
 
   public DbSet<Center> Centers { get; set; }
+  public DbSet<SewaType> SewaTypes { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
