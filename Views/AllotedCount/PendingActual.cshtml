@@ -12,31 +12,71 @@
       </div>
     </div>
   </form>
+  <style>
+    .pending-actual-table th,
+    .pending-actual-table td {
+      min-width: 90px;
+      max-width: 110px;
+      width: 100px;
+      word-break: break-word;
+      white-space: normal;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .pending-actual-table th {
+      overflow-wrap: break-word;
+      word-break: break-word;
+      white-space: normal;
+    }
+
+    .pending-actual-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: #f8f9fa;
+    }
+
+    .highlight-cell {
+      background-color: #fff9c4 !important;
+      /* light yellow */
+      transition: background 0.2s;
+    }
+  </style>
   <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
-    <table class="table table-bordered table-striped table-sm" style="font-size: 0.85rem; min-width: 600px;">
+    <table class="table table-bordered table-striped table-sm pending-actual-table" style="font-size: 0.85rem; min-width: 600px;">
       <thead class="table-light">
         <tr>
-          <th style="position: sticky; left: 0; background: #f8f9fa; z-index: 2;">Center \ Sewa Type</th>
+          <th style="position: sticky; left: 0; background: #f8f9fa; z-index: 2;">Center <br /> Sewa Type</th>
           @foreach (var sewaType in Model.SewaTypes)
           {
-            <th style="white-space: nowrap;">@sewaType.SewaName</th>
+            <th>@sewaType.SewaName</th>
           }
         </tr>
       </thead>
       <tbody>
         @foreach (var center in Model.Centers)
         {
+          bool hasAnyValue = false;
+          foreach (var sewaType in Model.SewaTypes)
+          {
+            var alloted = Model.GetAllotedCount(center.Id, sewaType.Id);
+            var actual = Model.GetActualCount(center.Id, sewaType.Id);
+            if (alloted.HasValue || actual.HasValue) { hasAnyValue = true; break; }
+          }
+          if (!hasAnyValue) { continue; }
           <tr>
-            <th style="position: sticky; left: 0; background: #f8f9fa; z-index: 1; white-space: nowrap;">@center.CenterName</th>
+            <th style="position: sticky; left: 0; background: #f8f9fa; z-index: 1;">@center.CenterName</th>
             @foreach (var sewaType in Model.SewaTypes)
             {
               var alloted = Model.GetAllotedCount(center.Id, sewaType.Id);
               var actual = Model.GetActualCount(center.Id, sewaType.Id);
-              <td style="padding: 0.25rem 0.5rem; text-align: center;">
-                <span title="Alloted">@(alloted.HasValue ? alloted.Value.ToString() : "-")</span>
+              var highlight = (alloted.HasValue || actual.HasValue) ? "highlight-cell" : "";
+              <td class="@highlight">
+                <span title="Alloted">@(alloted.HasValue? alloted.Value.ToString() : "-")</span>
                 <span style="color: #888;">/</span>
                 <span title="Actual" style="color: @(actual.HasValue ? (actual.Value >= (alloted ?? 0) ? "#28a745" : "#dc3545") : "#888")">
-                  @(actual.HasValue ? actual.Value.ToString() : "-")
+                  @(actual.HasValue? actual.Value.ToString() : "-")
                 </span>
               </td>
             }
