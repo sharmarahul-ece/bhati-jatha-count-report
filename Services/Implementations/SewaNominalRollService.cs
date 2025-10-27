@@ -1,9 +1,8 @@
-using bhati_jatha_count_report.Data;
-using bhati_jatha_count_report.Models.Entities;
-using bhati_jatha_count_report.Services.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using ClosedXML.Excel;
-
-namespace bhati_jatha_count_report.Services.Implementations;
+using bhati_jatha_count_report.Models.Entities;
+using bhati_jatha_count_report.Data;
+using bhati_jatha_count_report.Services.Interfaces;
 
 public class SewaNominalRollService : ISewaNominalRollService
 {
@@ -20,11 +19,10 @@ public class SewaNominalRollService : ISewaNominalRollService
   {
     using var workbook = new XLWorkbook(excelPath);
     var worksheet = workbook.Worksheets.First();
-
-    // Skip the first line (info), read headers from second line.
-    // Data starts at row 3 (1-based index).
     var firstDataRow = 3;
     var lastDataRow = worksheet.LastRowUsed().RowNumber();
+
+    var validationErrors = new List<string>();
 
     for (int rowIdx = firstDataRow; rowIdx <= lastDataRow; rowIdx++)
     {
@@ -47,49 +45,77 @@ public class SewaNominalRollService : ISewaNominalRollService
       var inchargeContact = row.Cell(16).GetString();
       var remarks = row.Cell(17).GetString();
 
-      // Upsert logic
-      var entity = _context.Set<SewaNominalRoll>()
-          .SingleOrDefault(x => x.NominalRollToken == nominalRollToken && x.SewaDate == sewaDate);
-      if (entity == null)
+      // Create new entity without RowId (it's an identity column)
+      var entity = new SewaNominalRoll
       {
-        entity = new SewaNominalRoll
+        NominalRollToken = nominalRollToken,
+        SewaDate = sewaDate,
+        SewaName = sewaName,
+        Department = department,
+        Zone = zone,
+        CentreName = centreName,
+        JourneyDate = journeyDate,
+        SewaDuration = sewaDuration,
+        Males = males,
+        Females = females,
+        TotalSewadars = totalSewadars,
+        SewaType = sewaType,
+        SewaStartTime = sewaStartTime,
+        InchargeName = inchargeName,
+        InchargeContact = inchargeContact,
+        Remarks = remarks
+        // CreatedAt will be set automatically by the database
+      };
+
+      // Validate entity
+      var context = new ValidationContext(entity);
+      var results = new List<ValidationResult>();
+      bool isValid = Validator.TryValidateObject(entity, context, results, true);
+
+      if (!isValid)
+      {
+        foreach (var error in results)
         {
-          NominalRollToken = nominalRollToken,
-          SewaDate = sewaDate,
-          SewaName = sewaName,
-          Department = department,
-          Zone = zone,
-          CentreName = centreName,
-          JourneyDate = journeyDate,
-          SewaDuration = sewaDuration,
-          Males = males,
-          Females = females,
-          TotalSewadars = totalSewadars,
-          SewaType = sewaType,
-          SewaStartTime = sewaStartTime,
-          InchargeName = inchargeName,
-          InchargeContact = inchargeContact,
-          Remarks = remarks,
-          CreatedAt = DateTime.UtcNow
-        };
+          // Log row number and error message
+          validationErrors.Add($"Row {rowIdx}: {error.ErrorMessage}");
+        }
+        continue; // Skip invalid row
+      }
+
+      // Upsert logic
+      var dbEntity = _context.Set<SewaNominalRoll>()
+          .SingleOrDefault(x => x.NominalRollToken == nominalRollToken && x.SewaDate == sewaDate);
+
+      if (dbEntity == null)
+      {
         _context.Set<SewaNominalRoll>().Add(entity);
       }
       else
       {
-        entity.SewaName = sewaName;
-        entity.Department = department;
-        entity.Zone = zone;
-        entity.CentreName = centreName;
-        entity.JourneyDate = journeyDate;
-        entity.SewaDuration = sewaDuration;
-        entity.Males = males;
-        entity.Females = females;
-        entity.TotalSewadars = totalSewadars;
-        entity.SewaType = sewaType;
-        entity.SewaStartTime = sewaStartTime;
-        entity.InchargeName = inchargeName;
-        entity.InchargeContact = inchargeContact;
-        entity.Remarks = remarks;
+        // Update relevant fields
+        dbEntity.SewaName = sewaName;
+        dbEntity.Department = department;
+        dbEntity.Zone = zone;
+        dbEntity.CentreName = centreName;
+        dbEntity.JourneyDate = journeyDate;
+        dbEntity.SewaDuration = sewaDuration;
+        dbEntity.Males = males;
+        dbEntity.Females = females;
+        dbEntity.TotalSewadars = totalSewadars;
+        dbEntity.SewaType = sewaType;
+        dbEntity.SewaStartTime = sewaStartTime;
+        dbEntity.InchargeName = inchargeName;
+        dbEntity.InchargeContact = inchargeContact;
+        dbEntity.Remarks = remarks;
+      }
+    }
+
+    // Optionally, log or return these errors for user feedback
+    if (validationErrors.Any())
+    {
+      foreach (var error in validationErrors)
+      {
+        _logger.LogWarning(error);
       }
     }
     await _context.SaveChangesAsync();
@@ -98,7 +124,6 @@ public class SewaNominalRollService : ISewaNominalRollService
   private static DateTime ParseDate(string value)
   {
     DateTime result;
-    // Try standard ISO or custom formats; fallback to DateTime.MinValue if invalid
     if (!DateTime.TryParse(value, out result))
     {
       result = DateTime.MinValue;
@@ -115,11 +140,4 @@ public class SewaNominalRollService : ISewaNominalRollService
     }
     return result;
   }
-}
-
-
-
-public class SewaNominalRollImportService
-{
-
 }

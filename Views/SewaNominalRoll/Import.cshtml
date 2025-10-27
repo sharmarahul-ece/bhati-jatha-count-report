@@ -1,0 +1,65 @@
+@{
+  ViewData["Title"] = "Import Sewa Nominal Roll";
+}
+
+<div class="container mt-4">
+  <h2>@ViewData["Title"]</h2>
+
+  @if (TempData["Success"] != null)
+  {
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      @TempData["Success"]
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  }
+
+  @if (TempData["Error"] != null)
+  {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      @TempData["Error"]
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  }
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="file" class="form-label">Select Excel File</label>
+          <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
+          <div class="form-text">Please upload an Excel file (.xlsx) containing the Sewa Nominal Roll data.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Import Data</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <h4>Excel File Format Requirements:</h4>
+    <ul class="list-group">
+      <li class="list-group-item">File must be in .xlsx format</li>
+      <li class="list-group-item">First row should contain column headers</li>
+      <li class="list-group-item">Data should start from row 3</li>
+      <li class="list-group-item">Required columns in order:
+        <ol>
+          <li>Nominal Roll Token</li>
+          <li>Sewa Date</li>
+          <li>Sewa Name</li>
+          <li>Department</li>
+          <li>Zone</li>
+          <li>Centre Name</li>
+          <li>Journey Date</li>
+          <li>Sewa Duration</li>
+          <li>Males</li>
+          <li>Females</li>
+          <li>Total Sewadars</li>
+          <li>Sewa Type</li>
+          <li>Sewa Start Time</li>
+          <li>Incharge Name</li>
+          <li>Incharge Contact</li>
+          <li>Remarks</li>
+        </ol>
+      </li>
+    </ul>
+  </div>
+</div>

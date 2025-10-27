@@ -30,8 +30,6 @@ public class ApplicationDbContext : DbContext
     modelBuilder.Entity<SewaNominalRoll>(entity =>
     {
       entity.HasKey(e => new { e.NominalRollToken, e.SewaDate });
-      entity.Property(e => e.RowId).ValueGeneratedOnAdd();
-      entity.HasIndex(e => e.RowId).IsUnique();
       entity.Property(e => e.CreatedAt)
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
     });

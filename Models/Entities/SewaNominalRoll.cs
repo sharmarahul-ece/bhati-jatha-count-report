@@ -6,10 +6,6 @@ namespace bhati_jatha_count_report.Models.Entities;
 public class SewaNominalRoll
 {
   [Key]
-  [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public int RowId { get; set; } // Unique row id, auto generated
-
-  [Required]
   public string NominalRollToken { get; set; } = string.Empty;
 
   [Required]
@@ -31,6 +27,6 @@ public class SewaNominalRoll
   public string InchargeContact { get; set; } = string.Empty;
   public string Remarks { get; set; } = string.Empty;
 
-  [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+  [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+  public DateTime CreatedAt { get; set; }
 }
