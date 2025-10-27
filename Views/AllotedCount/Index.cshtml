@@ -4,9 +4,42 @@
 }
 <div class="container">
   <h2 class="mb-4">Manage Alloted Counts</h2>
-  <div class="row mb-3">
-    <div class="col-md-12">
-      <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#allotedCountModal" onclick="resetForm()">
+  <div class="row mb-3 align-items-end">
+    <div class="col-md-3">
+      <label for="filterCenter" class="form-label">Center</label>
+      <select id="filterCenter" class="form-select">
+        <option value="">All</option>
+        @foreach (var c in Model.Centers)
+        {
+          <option value="@c.Id">@c.CenterName</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="filterWeekDay" class="form-label">Week Day</label>
+      <select id="filterWeekDay" class="form-select">
+        <option value="">All</option>
+        <option value="0">Sunday</option>
+        <option value="1">Monday</option>
+        <option value="2">Tuesday</option>
+        <option value="3">Wednesday</option>
+        <option value="4">Thursday</option>
+        <option value="5">Friday</option>
+        <option value="6">Saturday</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="filterSewaType" class="form-label">Sewa Type</label>
+      <select id="filterSewaType" class="form-select">
+        <option value="">All</option>
+        @foreach (var s in Model.SewaTypes)
+        {
+          <option value="@s.Id">@s.SewaName</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-3 d-flex flex-column gap-2">
+      <button type="button" class="btn btn-primary w-100 mb-2" data-bs-toggle="modal" data-bs-target="#allotedCountModal" onclick="resetForm()">
         <i class="bi bi-plus-circle"></i> Add Record
       </button>
     </div>
@@ -103,29 +136,34 @@
     function renderTable() {
       const tbody = document.getElementById('allotedCountTableBody');
       tbody.innerHTML = '';
-      allotedCountData.forEach(item => {
+      const centerId = document.getElementById('filterCenter').value;
+      const weekDay = document.getElementById('filterWeekDay').value;
+      const sewaTypeId = document.getElementById('filterSewaType').value;
+      let filtered = allotedCountData;
+      if (centerId) filtered = filtered.filter(x => x.CenterId == centerId);
+      if (weekDay) filtered = filtered.filter(x => x.WeekDay == weekDay);
+      if (sewaTypeId) filtered = filtered.filter(x => x.SewaTypeId == sewaTypeId);
+      filtered.forEach(item => {
         const tr = document.createElement('tr');
-        // Use PascalCase properties as serialized by System.Text.Json
         const wd = item.WeekDay;
         const center = centers.find(c => c.Id === item.CenterId);
         const sewa = sewaTypes.find(s => s.Id === item.SewaTypeId);
-
         tr.innerHTML = `
-            <td>${weekDays[wd]}</td>
-            <td>${center ? center.CenterName : ''}</td>
-            <td>${sewa ? sewa.SewaName : ''}</td>
-            <td>${item.Count}</td>
-            <td>
-              <button class="btn btn-sm btn-primary me-2 edit-btn" data-weekday="${item.WeekDay}" 
-                      data-center="${item.CenterId}" data-sewa="${item.SewaTypeId}">
-                <i class="bi bi-pencil"></i> Edit
-              </button>
-              <button class="btn btn-sm btn-danger delete-btn" data-weekday="${item.WeekDay}" 
-                      data-center="${item.CenterId}" data-sewa="${item.SewaTypeId}">
-                <i class="bi bi-trash"></i> Delete
-              </button>
-            </td>
-          `;
+              <td>${weekDays[wd]}</td>
+              <td>${center ? center.CenterName : ''}</td>
+              <td>${sewa ? sewa.SewaName : ''}</td>
+              <td>${item.Count}</td>
+              <td>
+                <button class="btn btn-sm btn-primary me-2 edit-btn" data-weekday="${item.WeekDay}" 
+                        data-center="${item.CenterId}" data-sewa="${item.SewaTypeId}">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger delete-btn" data-weekday="${item.WeekDay}" 
+                        data-center="${item.CenterId}" data-sewa="${item.SewaTypeId}">
+                  <i class="bi bi-trash"></i> Delete
+                </button>
+              </td>
+            `;
         tbody.appendChild(tr);
       });
     }
@@ -200,5 +238,8 @@
 
     // Initial render
     renderTable();
+    document.getElementById('filterCenter').addEventListener('change', renderTable);
+    document.getElementById('filterWeekDay').addEventListener('change', renderTable);
+    document.getElementById('filterSewaType').addEventListener('change', renderTable);
   </script>
 }
