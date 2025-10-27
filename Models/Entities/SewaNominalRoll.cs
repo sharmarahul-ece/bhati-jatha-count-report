@@ -27,6 +27,9 @@ public class SewaNominalRoll
   public string InchargeContact { get; set; } = string.Empty;
   public string Remarks { get; set; } = string.Empty;
 
+  // Name of the source file that imported this row (e.g. uploaded Excel filename)
+  public string SourceFileName { get; set; } = string.Empty;
+
   [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
   public DateTime CreatedAt { get; set; }
 }

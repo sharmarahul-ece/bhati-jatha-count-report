@@ -16,9 +16,35 @@ public class SewaNominalRollController : Controller
     _logger = logger;
   }
 
-  public IActionResult Import()
+  public async Task<IActionResult> Import(string? centerFilter, string? sewaTypeFilter, DateTime? startDate, DateTime? endDate)
   {
-    return View();
+    // Default to today's date when no range provided
+    if (!startDate.HasValue && !endDate.HasValue)
+    {
+      startDate = DateTime.Today;
+      endDate = DateTime.Today;
+    }
+
+    var centers = (await _sewaNominalRollService.GetDistinctCentersAsync()).ToList();
+    var sewaTypes = (await _sewaNominalRollService.GetDistinctSewaTypesAsync()).ToList();
+    var sourceFiles = (await _sewaNominalRollService.GetDistinctSourceFilesAsync()).ToList();
+
+    var results = await _sewaNominalRollService.Query(startDate, endDate, centerFilter, sewaTypeFilter);
+
+    var model = new bhati_jatha_count_report.ViewModels.SewaNominalRollImportViewModel
+    {
+      Centers = centers,
+      SewaTypes = sewaTypes,
+      CenterFilter = centerFilter,
+      SewaTypeFilter = sewaTypeFilter,
+      StartDate = startDate,
+      EndDate = endDate,
+      Results = results
+    };
+
+    model.SourceFiles = sourceFiles;
+
+    return View(model);
   }
 
   [HttpPost]
@@ -47,8 +73,8 @@ public class SewaNominalRollController : Controller
         await file.CopyToAsync(stream);
       }
 
-      // Import the data
-      await _sewaNominalRollService.Import(tempFile);
+      // Import the data; pass original filename so rows are tagged with it
+      await _sewaNominalRollService.Import(tempFile, file.FileName);
 
       // Clean up the temporary file
       System.IO.File.Delete(tempFile);
@@ -62,5 +88,29 @@ public class SewaNominalRollController : Controller
       TempData["Error"] = "Error importing data: " + ex.Message;
       return RedirectToAction(nameof(Import));
     }
+  }
+
+  [HttpPost]
+  [ValidateAntiForgeryToken]
+  public async Task<IActionResult> DeleteFileData(string filename)
+  {
+    if (string.IsNullOrWhiteSpace(filename))
+    {
+      TempData["Error"] = "Invalid filename";
+      return RedirectToAction(nameof(Import));
+    }
+
+    try
+    {
+      await _sewaNominalRollService.DeleteBySourceFileAsync(filename);
+      TempData["Success"] = $"All rows imported from '{filename}' have been deleted.";
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error deleting rows for file {filename}", filename);
+      TempData["Error"] = "Error deleting rows: " + ex.Message;
+    }
+
+    return RedirectToAction(nameof(Import));
   }
 }

@@ -3,6 +3,8 @@ using ClosedXML.Excel;
 using bhati_jatha_count_report.Models.Entities;
 using bhati_jatha_count_report.Data;
 using bhati_jatha_count_report.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 public class SewaNominalRollService : ISewaNominalRollService
 {
@@ -15,7 +17,7 @@ public class SewaNominalRollService : ISewaNominalRollService
     _logger = logger;
   }
 
-  public async Task Import(string excelPath)
+  public async Task Import(string excelPath, string sourceFileName)
   {
     using var workbook = new XLWorkbook(excelPath);
     var worksheet = workbook.Worksheets.First();
@@ -31,6 +33,11 @@ public class SewaNominalRollService : ISewaNominalRollService
       var nominalRollToken = row.Cell(1).GetString().Trim();
       var sewaDate = ParseDate(row.Cell(8).GetString());
       var sewaName = row.Cell(3).GetString();
+      // Only import rows matching the desired SewaName
+      if (!string.Equals(sewaName?.Trim(), "MAJOR CENTRE - BHATI DELHI", StringComparison.OrdinalIgnoreCase))
+      {
+        continue;
+      }
       var department = row.Cell(4).GetString();
       var zone = row.Cell(5).GetString();
       var centreName = row.Cell(6).GetString();
@@ -66,6 +73,9 @@ public class SewaNominalRollService : ISewaNominalRollService
         Remarks = remarks
         // CreatedAt will be set automatically by the database
       };
+
+      // attach source file name passed from controller (use the uploaded filename)
+      entity.SourceFileName = sourceFileName ?? string.Empty;
 
       // Validate entity
       var context = new ValidationContext(entity);
@@ -107,6 +117,8 @@ public class SewaNominalRollService : ISewaNominalRollService
         dbEntity.InchargeName = inchargeName;
         dbEntity.InchargeContact = inchargeContact;
         dbEntity.Remarks = remarks;
+        // update source file name if reprocessed
+        dbEntity.SourceFileName = sourceFileName;
       }
     }
 
@@ -119,6 +131,76 @@ public class SewaNominalRollService : ISewaNominalRollService
       }
     }
     await _context.SaveChangesAsync();
+  }
+
+  public async Task<IEnumerable<SewaNominalRoll>> Query(DateTime? startDate, DateTime? endDate, string? centerName, string? sewaType)
+  {
+    var query = _context.SewaNominalRolls.AsQueryable();
+
+    if (startDate.HasValue)
+    {
+      query = query.Where(x => x.SewaDate >= startDate.Value.Date);
+    }
+    if (endDate.HasValue)
+    {
+      // include entire day
+      query = query.Where(x => x.SewaDate <= endDate.Value.Date.AddDays(1).AddTicks(-1));
+    }
+    if (!string.IsNullOrWhiteSpace(centerName) && centerName != "__all__")
+    {
+      query = query.Where(x => EF.Functions.Like(x.CentreName, $"%{centerName}%"));
+    }
+    if (!string.IsNullOrWhiteSpace(sewaType) && sewaType != "__all__")
+    {
+      query = query.Where(x => EF.Functions.Like(x.SewaType, $"%{sewaType}%"));
+    }
+
+    return await query.OrderByDescending(x => x.SewaDate).ToListAsync();
+  }
+
+  public async Task<IEnumerable<string>> GetDistinctSourceFilesAsync()
+  {
+    return await _context.SewaNominalRolls
+      .Select(x => x.SourceFileName)
+      .Where(x => x != null && x != string.Empty)
+      .Distinct()
+      .OrderBy(x => x)
+      .ToListAsync();
+  }
+
+  public async Task DeleteBySourceFileAsync(string sourceFileName)
+  {
+    if (string.IsNullOrWhiteSpace(sourceFileName)) return;
+
+    var items = await _context.SewaNominalRolls
+      .Where(x => x.SourceFileName == sourceFileName)
+      .ToListAsync();
+
+    if (items.Any())
+    {
+      _context.SewaNominalRolls.RemoveRange(items);
+      await _context.SaveChangesAsync();
+    }
+  }
+
+  public async Task<IEnumerable<string>> GetDistinctCentersAsync()
+  {
+    return await _context.SewaNominalRolls
+      .Select(x => x.CentreName)
+      .Where(x => x != null && x != string.Empty)
+      .Distinct()
+      .OrderBy(x => x)
+      .ToListAsync();
+  }
+
+  public async Task<IEnumerable<string>> GetDistinctSewaTypesAsync()
+  {
+    return await _context.SewaNominalRolls
+      .Select(x => x.SewaType)
+      .Where(x => x != null && x != string.Empty)
+      .Distinct()
+      .OrderBy(x => x)
+      .ToListAsync();
   }
 
   private static DateTime ParseDate(string value)

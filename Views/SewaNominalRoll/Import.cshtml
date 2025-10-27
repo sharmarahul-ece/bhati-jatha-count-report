@@ -1,3 +1,5 @@
+@model bhati_jatha_count_report.ViewModels.SewaNominalRollImportViewModel
+
 @{
   ViewData["Title"] = "Import Sewa Nominal Roll";
 }
@@ -21,45 +23,132 @@
     </div>
   }
 
-  <div class="card">
-    <div class="card-body">
-      <form method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-          <label for="file" class="form-label">Select Excel File</label>
-          <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
-          <div class="form-text">Please upload an Excel file (.xlsx) containing the Sewa Nominal Roll data.</div>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="file" class="form-label">Select Excel File</label>
+              <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Import Data</button>
+          </form>
         </div>
-        <button type="submit" class="btn btn-primary">Import Data</button>
-      </form>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label">Center</label>
+              <select name="centerFilter" class="form-select">
+                <option value="__all__">All</option>
+                @foreach (var c in Model.Centers)
+                {
+                  <option value="@c" selected="@(Model.CenterFilter == c ? "selected" : null)">@c</option>
+                }
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Sewa Type</label>
+              <select name="sewaTypeFilter" class="form-select">
+                <option value="__all__">All</option>
+                @foreach (var s in Model.SewaTypes)
+                {
+                  <option value="@s" selected="@(Model.SewaTypeFilter == s ? "selected" : null)">@s</option>
+                }
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Date Range</label>
+              <div class="d-flex">
+                <input type="date" name="startDate" class="form-control me-2" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
+                <input type="date" name="endDate" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+              </div>
+            </div>
+            <div class="col-12">
+              <button class="btn btn-secondary">Filter</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="mt-4">
-    <h4>Excel File Format Requirements:</h4>
-    <ul class="list-group">
-      <li class="list-group-item">File must be in .xlsx format</li>
-      <li class="list-group-item">First row should contain column headers</li>
-      <li class="list-group-item">Data should start from row 3</li>
-      <li class="list-group-item">Required columns in order:
-        <ol>
-          <li>Nominal Roll Token</li>
-          <li>Sewa Date</li>
-          <li>Sewa Name</li>
-          <li>Department</li>
-          <li>Zone</li>
-          <li>Centre Name</li>
-          <li>Journey Date</li>
-          <li>Sewa Duration</li>
-          <li>Males</li>
-          <li>Females</li>
-          <li>Total Sewadars</li>
-          <li>Sewa Type</li>
-          <li>Sewa Start Time</li>
-          <li>Incharge Name</li>
-          <li>Incharge Contact</li>
-          <li>Remarks</li>
-        </ol>
-      </li>
-    </ul>
+  <div class="mt-4 card">
+    <div class="card-body">
+      <div class="table-responsive" style="max-height:500px; overflow:auto;">
+        <table class="table table-sm table-bordered table-hover">
+          <thead class="table-light position-sticky" style="top:0; z-index:1;">
+            <tr>
+              <th>NominalRollToken</th>
+              <th>SewaDate</th>
+              <th>SewaName</th>
+              <th>Department</th>
+              <th>Zone</th>
+              <th>CentreName</th>
+              <th>JourneyDate</th>
+              <th>SewaDuration</th>
+              <th>Males</th>
+              <th>Females</th>
+              <th>TotalSewadars</th>
+              <th>SewaType</th>
+              <th>SewaStartTime</th>
+              <th>InchargeName</th>
+              <th>InchargeContact</th>
+              <th>Remarks</th>
+              <th>SourceFile</th>
+              <th>CreatedAt</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach (var r in Model.Results)
+            {
+              <tr>
+                <td>@r.NominalRollToken</td>
+                <td>@(r.SewaDate == DateTime.MinValue ? "" : r.SewaDate.ToString("yyyy-MM-dd"))</td>
+                <td>@r.SewaName</td>
+                <td>@r.Department</td>
+                <td>@r.Zone</td>
+                <td>@r.CentreName</td>
+                <td>@(r.JourneyDate == DateTime.MinValue ? "" : r.JourneyDate.ToString("yyyy-MM-dd"))</td>
+                <td>@r.SewaDuration</td>
+                <td>@r.Males</td>
+                <td>@r.Females</td>
+                <td>@r.TotalSewadars</td>
+                <td>@r.SewaType</td>
+                <td>@r.SewaStartTime</td>
+                <td>@r.InchargeName</td>
+                <td>@r.InchargeContact</td>
+                <td>@r.Remarks</td>
+                <td>@r.SourceFileName</td>
+                <td>@(r.CreatedAt == DateTime.MinValue ? "" : r.CreatedAt.ToString("yyyy-MM-dd HH:mm"))</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
+
+  <div class="mt-3">
+    <h5>Imported source files</h5>
+    <div class="d-flex gap-2 flex-wrap">
+      @foreach (var f in Model.SourceFiles)
+      {
+        <form method="post" asp-action="DeleteFileData" onsubmit="return confirm('Delete all rows imported from ' + '@f' + '?');">
+          <input type="hidden" name="filename" value="@f" />
+          <button type="submit" class="btn btn-outline-danger btn-sm">Delete @f</button>
+        </form>
+      }
+      @if (!Model.SourceFiles.Any())
+      {
+        <div class="text-muted">No source files</div>
+      }
+    </div>
+  </div>
+
 </div>
