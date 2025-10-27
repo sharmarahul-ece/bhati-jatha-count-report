@@ -13,6 +13,8 @@ public class ApplicationDbContext : DbContext
   public DbSet<Center> Centers { get; set; }
   public DbSet<SewaType> SewaTypes { get; set; }
 
+  public DbSet<SewaNominalRoll> SewaNominalRolls { get; set; }
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
@@ -23,6 +25,15 @@ public class ApplicationDbContext : DbContext
       entity.Property(e => e.Id).ValueGeneratedOnAdd();
       entity.Property(e => e.CenterName).IsRequired();
       entity.Property(e => e.CenterType).IsRequired();
+    });
+
+    modelBuilder.Entity<SewaNominalRoll>(entity =>
+    {
+      entity.HasKey(e => new { e.NominalRollToken, e.SewaDate });
+      entity.Property(e => e.RowId).ValueGeneratedOnAdd();
+      entity.HasIndex(e => e.RowId).IsUnique();
+      entity.Property(e => e.CreatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
     });
   }
 }

@@ -11,6 +11,7 @@ builder.Services.AddControllersWithViews();
 // Register services
 builder.Services.AddScoped<ICenterService, CenterService>();
 builder.Services.AddScoped<ISewaTypeService, SewaTypeService>();
+builder.Services.AddScoped<ISewaNominalRollService, SewaNominalRollService>();
 
 // Add DbContext configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
