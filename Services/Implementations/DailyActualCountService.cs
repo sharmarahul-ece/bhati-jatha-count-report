@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using bhati_jatha_count_report.Data;
 using bhati_jatha_count_report.Models.Entities;
 using bhati_jatha_count_report.Services.Interfaces;
@@ -18,12 +19,18 @@ namespace bhati_jatha_count_report.Services.Implementations
 
     public IEnumerable<DailyActualCount> GetAll()
     {
-      return _context.DailyActualCounts.ToList();
+      return _context.DailyActualCounts
+        .Include(x => x.Center)
+        .Include(x => x.SewaType)
+        .ToList();
     }
 
     public IEnumerable<DailyActualCount> GetFiltered(DateTime? fromDate, DateTime? toDate, int? centerId, int? sewaTypeId)
     {
-      var query = _context.DailyActualCounts.AsQueryable();
+      var query = _context.DailyActualCounts
+        .Include(x => x.Center)
+        .Include(x => x.SewaType)
+        .AsQueryable();
 
       if (fromDate.HasValue)
       {
