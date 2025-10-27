@@ -27,6 +27,7 @@
                     {
                         <th>@sewaType.SewaName</th>
                     }
+                    <th class="bg-light">Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,14 +35,50 @@
                 {
                     <tr>
                         <th>@center.CenterName</th>
+                        @{
+                            int rowTotal = 0;
+                        }
                         @foreach (var sewaType in Model.SewaTypes)
                         {
                             var count = Model.GetAllotedCount(center.Id, sewaType.Id);
-                            <td>@(count.HasValue ? count.Value.ToString() : "-")</td>
+                            if (count.HasValue)
+                            {
+                                rowTotal += count.Value;
+                                <td style="background-color: #fff9c4">@count.Value</td>
+                            }
+                            else
+                            {
+                                <td>-</td>
+                            }
                         }
+                        <td class="bg-light fw-bold">@rowTotal</td>
                     </tr>
                 }
             </tbody>
+            <tfoot>
+                <tr>
+                    <th class="bg-light">Total</th>
+                    @{
+                        var colTotals = new List<int>();
+                        foreach (var sewaType in Model.SewaTypes)
+                        {
+                            int colTotal = 0;
+                            foreach (var center in Model.Centers)
+                            {
+                                var count = Model.GetAllotedCount(center.Id, sewaType.Id);
+                                if (count.HasValue) colTotal += count.Value;
+                            }
+                            colTotals.Add(colTotal);
+                        }
+                        int grandTotal = colTotals.Sum();
+                    }
+                    @foreach (var colTotal in colTotals)
+                    {
+                        <th class="bg-light">@colTotal</th>
+                    }
+                    <th class="bg-warning">@grandTotal</th>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
