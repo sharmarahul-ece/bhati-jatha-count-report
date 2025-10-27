@@ -1,0 +1,60 @@
+@model bhati_jatha_count_report.Models.ViewModels.PendingActualCountViewModel
+@{
+  ViewData["Title"] = "Pending Daily Actual Count";
+}
+<div class="container-fluid">
+  <h2 class="mb-4">Pending Daily Actual Count</h2>
+  <form method="get" class="mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-auto">
+        <label for="date" class="form-label">Date</label>
+        <input type="date" class="form-control" id="date" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="this.form.submit()" />
+      </div>
+      <div class="col-auto">
+        <label for="weekDay" class="form-label">Week Day</label>
+        <select class="form-select" id="weekDay" name="weekDay" onchange="this.form.submit()">
+          @foreach (var wd in Model.WeekDays)
+          {
+            var selected = wd.Value == Model.SelectedWeekDay.ToString() ? "selected" : null;
+            <option value="@wd.Value" selected="@selected">@wd.Text</option>
+          }
+        </select>
+      </div>
+    </div>
+  </form>
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Center \ Sewa Type</th>
+          @foreach (var sewaType in Model.SewaTypes)
+          {
+            <th>@sewaType.SewaName</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var center in Model.Centers)
+        {
+          <tr>
+            <th>@center.CenterName</th>
+            @foreach (var sewaType in Model.SewaTypes)
+            {
+              var alloted = Model.GetAllotedCount(center.Id, sewaType.Id);
+              var actual = Model.GetActualCount(center.Id, sewaType.Id);
+              var pending = alloted.HasValue ? (int?)(alloted.Value - (actual ?? 0)) : null;
+              if (pending.HasValue && pending.Value > 0)
+              {
+                <td style="background-color: #fff9c4">@pending.Value</td>
+              }
+              else
+              {
+                <td>-</td>
+              }
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

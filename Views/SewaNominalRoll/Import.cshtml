@@ -86,9 +86,9 @@
             <tr>
               <th>NominalRollToken</th>
               <th>SewaDate</th>
-              <th>SewaName</th>
-              <th>Department</th>
-              <th>Zone</th>
+              @* <th>SewaName</th> *@
+              @* <th>Department</th> *@
+              @* <th>Zone</th> *@
               <th>CentreName</th>
               <th>JourneyDate</th>
               <th>SewaDuration</th>
@@ -97,11 +97,11 @@
               <th>TotalSewadars</th>
               <th>SewaType</th>
               <th>SewaStartTime</th>
-              <th>InchargeName</th>
-              <th>InchargeContact</th>
+              @* <th>InchargeName</th> *@
+              @* <th>InchargeContact</th> *@
               <th>Remarks</th>
-              <th>SourceFile</th>
-              <th>CreatedAt</th>
+              @* <th>SourceFile</th> *@
+              @* <th>CreatedAt</th> *@
             </tr>
           </thead>
           <tbody>
@@ -110,9 +110,9 @@
               <tr>
                 <td>@r.NominalRollToken</td>
                 <td>@(r.SewaDate == DateTime.MinValue ? "" : r.SewaDate.ToString("yyyy-MM-dd"))</td>
-                <td>@r.SewaName</td>
-                <td>@r.Department</td>
-                <td>@r.Zone</td>
+                @* <td>@r.SewaName</td> *@
+                @* <td>@r.Department</td> *@
+                @* <td>@r.Zone</td> *@
                 <td>@r.CentreName</td>
                 <td>@(r.JourneyDate == DateTime.MinValue ? "" : r.JourneyDate.ToString("yyyy-MM-dd"))</td>
                 <td>@r.SewaDuration</td>
@@ -121,11 +121,11 @@
                 <td>@r.TotalSewadars</td>
                 <td>@r.SewaType</td>
                 <td>@r.SewaStartTime</td>
-                <td>@r.InchargeName</td>
-                <td>@r.InchargeContact</td>
+                @* <td>@r.InchargeName</td> *@
+                @* <td>@r.InchargeContact</td> *@
                 <td>@r.Remarks</td>
-                <td>@r.SourceFileName</td>
-                <td>@(r.CreatedAt == DateTime.MinValue ? "" : r.CreatedAt.ToString("yyyy-MM-dd HH:mm"))</td>
+                @* <td>@r.SourceFileName</td> *@
+                @* <td>@(r.CreatedAt == DateTime.MinValue ? "" : r.CreatedAt.ToString("yyyy-MM-dd HH:mm"))</td> *@
               </tr>
             }
           </tbody>

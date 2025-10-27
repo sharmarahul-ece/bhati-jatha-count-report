@@ -106,5 +106,63 @@ namespace bhati_jatha_count_report.Controllers
       };
       return View(vm);
     }
+    [HttpGet]
+    public async Task<IActionResult> PendingActual(DateTime? date, int? weekDay)
+    {
+      var centers = (await _centerService.GetAllCentersAsync()).ToList();
+      var sewaTypes = (await _sewaTypeService.GetAllSewaTypesAsync()).ToList();
+      var allotedCounts = _service.GetAll().ToList();
+      var actualCounts = HttpContext.RequestServices.GetService(typeof(IDailyActualCountService)) is IDailyActualCountService actualService
+        ? actualService.GetAll().ToList() : new List<bhati_jatha_count_report.Models.Entities.DailyActualCount>();
+      DateTime selectedDate = date ?? DateTime.Today;
+      int selectedWeekDay = weekDay ?? (int)selectedDate.DayOfWeek;
+      var weekDays = System.Enum.GetValues(typeof(WeekDay))
+        .Cast<WeekDay>()
+        .Select(wd => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+          Value = ((int)wd).ToString(),
+          Text = wd.ToString()
+        }).ToList();
+
+      var vm = new Models.ViewModels.PendingActualCountViewModel
+      {
+        Centers = centers,
+        SewaTypes = sewaTypes,
+        AllotedCounts = allotedCounts.Where(x => (int)x.WeekDay == selectedWeekDay).ToList(),
+        DailyActualCounts = actualCounts.Where(x => x.Date.Date == selectedDate.Date).ToList(),
+        SelectedWeekDay = selectedWeekDay,
+        SelectedDate = selectedDate,
+        WeekDays = weekDays
+      };
+      return View(vm);
+    }
+    [HttpGet]
+    public async Task<IActionResult> PendingSimple(DateTime? date)
+    {
+      var centers = (await _centerService.GetAllCentersAsync()).ToList();
+      var sewaTypes = (await _sewaTypeService.GetAllSewaTypesAsync()).ToList();
+      var allotedCounts = _service.GetAll().ToList();
+      var actualCounts = HttpContext.RequestServices.GetService(typeof(IDailyActualCountService)) is IDailyActualCountService actualService
+        ? actualService.GetAll().ToList() : new List<bhati_jatha_count_report.Models.Entities.DailyActualCount>();
+      DateTime selectedDate = date ?? DateTime.Today;
+      int selectedWeekDay = (int)selectedDate.DayOfWeek;
+
+      var pending = allotedCounts
+        .Where(x => (int)x.WeekDay == selectedWeekDay)
+        .Where(x => !actualCounts.Any(a => a.Date.Date == selectedDate.Date && a.CenterId == x.CenterId && a.SewaTypeId == x.SewaTypeId))
+        .Select(x => new Models.ViewModels.PendingSimpleListViewModel.PendingItem
+        {
+          CenterName = centers.FirstOrDefault(c => c.Id == x.CenterId)?.CenterName ?? $"Center {x.CenterId}",
+          SewaTypeName = sewaTypes.FirstOrDefault(s => s.Id == x.SewaTypeId)?.SewaName ?? $"SewaType {x.SewaTypeId}"
+        })
+        .ToList();
+
+      var vm = new Models.ViewModels.PendingSimpleListViewModel
+      {
+        SelectedDate = selectedDate,
+        Pending = pending
+      };
+      return View(vm);
+    }
   }
 }
