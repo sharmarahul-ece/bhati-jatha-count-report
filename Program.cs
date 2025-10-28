@@ -15,9 +15,14 @@ builder.Services.AddScoped<ISewaNominalRollService, SewaNominalRollService>();
 builder.Services.AddScoped<IDailyActualCountService, DailyActualCountService>();
 builder.Services.AddScoped<IAllotedCountService, AllotedCountService>();
 
-// Add DbContext configuration
+// Add DbContext configuration for PostgreSQL
+var pgConnStr = Environment.GetEnvironmentVariable("SECURE_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Host=localhost;Port=5432;Database=bhati_jatha_count_report;Username=postgres;Password=postgres";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(pgConnStr));
+// Ensure Npgsql is loaded for EF Core tools
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var app = builder.Build();
 
