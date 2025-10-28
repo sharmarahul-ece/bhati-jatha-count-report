@@ -1,40 +1,44 @@
-SET IDENTITY_INSERT Centers ON;
+-- If "Id" is a SERIAL or IDENTITY column and you want to insert explicit Ids,
+-- temporarily allow it by setting the proper sequence afterward if required.
 
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (1, 'AMBEDKAR NAGAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (2, 'ASHOK NAGAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (3, 'ASHOK VIHAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (4, 'BIJWASAN', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (5, 'CHITRAKOOT', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (6, 'DARYAGANJ', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (7, 'DILSHAD GARDEN', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (8, 'DWARKA', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (9, 'GEETA COLONY', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (10, 'JAITPUR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (11, 'JANAKPURI', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (12, 'KARALA', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (13, 'KARKARDOOMA', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (14, 'LAJPAT NAGAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (15, 'LODHI COLONY', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (16, 'MAYUR VIHAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (17, 'MAYUR VIHAR PH-1 EXT.', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (18, 'MOHAN GARDEN', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (19, 'MUNDKA', 'SC');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (20, 'NAJAFGARH', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (21, 'NANGLOI', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (22, 'NARELA', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (23, 'PASCHIM VIHAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (24, 'PITAMPURA', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (25, 'POONTH KHURD', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (26, 'PRIYADARSHNI VIHAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (27, 'QADIPUR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (28, 'R.K. PURAM', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (29, 'RADIO COLONY', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (30, 'RANAJI ENCLAVE', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (31, 'RANI BAGH', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (32, 'SONIA VIHAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (33, 'SULTANPURI', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (34, 'UTTAM NAGAR', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (35, 'VASANT KUNJ', 'C');
-INSERT INTO Centers (Id, CenterName, CenterType) VALUES (36, 'VIKASPURI', 'C');
+-- Insert statements for all centers
+INSERT INTO "Centers" ("Id", "CenterName", "CenterType") VALUES
+  (1, 'AMBEDKAR NAGAR', 'C'),
+  (2, 'ASHOK NAGAR', 'C'),
+  (3, 'ASHOK VIHAR', 'C'),
+  (4, 'BIJWASAN', 'C'),
+  (5, 'CHITRAKOOT', 'C'),
+  (6, 'DARYAGANJ', 'C'),
+  (7, 'DILSHAD GARDEN', 'C'),
+  (8, 'DWARKA', 'C'),
+  (9, 'GEETA COLONY', 'C'),
+  (10, 'JAITPUR', 'C'),
+  (11, 'JANAKPURI', 'C'),
+  (12, 'KARALA', 'C'),
+  (13, 'KARKARDOOMA', 'C'),
+  (14, 'LAJPAT NAGAR', 'C'),
+  (15, 'LODHI COLONY', 'C'),
+  (16, 'MAYUR VIHAR', 'C'),
+  (17, 'MAYUR VIHAR PH-1 EXT.', 'C'),
+  (18, 'MOHAN GARDEN', 'C'),
+  (19, 'MUNDKA', 'SC'),
+  (20, 'NAJAFGARH', 'C'),
+  (21, 'NANGLOI', 'C'),
+  (22, 'NARELA', 'C'),
+  (23, 'PASCHIM VIHAR', 'C'),
+  (24, 'PITAMPURA', 'C'),
+  (25, 'POONTH KHURD', 'C'),
+  (26, 'PRIYADARSHNI VIHAR', 'C'),
+  (27, 'QADIPUR', 'C'),
+  (28, 'R.K. PURAM', 'C'),
+  (29, 'RADIO COLONY', 'C'),
+  (30, 'RANAJI ENCLAVE', 'C'),
+  (31, 'RANI BAGH', 'C'),
+  (32, 'SONIA VIHAR', 'C'),
+  (33, 'SULTANPURI', 'C'),
+  (34, 'UTTAM NAGAR', 'C'),
+  (35, 'VASANT KUNJ', 'C'),
+  (36, 'VIKASPURI', 'C');
 
-SET IDENTITY_INSERT Centers OFF;
+
+SELECT setval(pg_get_serial_sequence('"Centers"', 'Id'), (SELECT MAX("Id") FROM "Centers"));

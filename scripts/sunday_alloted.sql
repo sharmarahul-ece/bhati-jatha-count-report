@@ -1,44 +1,47 @@
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 2, 1, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 23, 1, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 34, 1, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 3, 2, 15);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 10, 2, 20);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 17, 2, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 26, 2, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 30, 2, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 34, 2, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 1, 3, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 16, 3, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 28, 3, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 29, 3, 40);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 36, 3, 15);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 5, 4, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 8, 4, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 14, 4, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 15, 4, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 22, 4, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 24, 4, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 25, 4, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 26, 4, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 27, 4, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 1, 5, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 5, 5, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 32, 5, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 34, 5, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 7, 6, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 8, 6, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 13, 6, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 16, 6, 20);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 1, 7, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 2, 7, 15);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 10, 7, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 13, 7, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 12, 9, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 21, 9, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 2, 10, 30);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 9, 10, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 17, 10, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 18, 10, 10);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 19, 10, 5);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 28, 10, 15);
-INSERT INTO AllotedCounts (WeekDay, CenterId, SewaTypeId, Count) VALUES (0, 29, 10, 10);
+INSERT INTO
+  "AllotedCounts" ("WeekDay", "CenterId", "SewaTypeId", "Count")
+VALUES
+  (0, 2, 1, 10),
+  (0, 23, 1, 10),
+  (0, 34, 1, 5),
+  (0, 3, 2, 15),
+  (0, 10, 2, 20),
+  (0, 17, 2, 10),
+  (0, 26, 2, 5),
+  (0, 30, 2, 10),
+  (0, 34, 2, 5),
+  (0, 1, 3, 10),
+  (0, 16, 3, 10),
+  (0, 28, 3, 10),
+  (0, 29, 3, 40),
+  (0, 36, 3, 15),
+  (0, 5, 4, 10),
+  (0, 8, 4, 5),
+  (0, 14, 4, 10),
+  (0, 15, 4, 10),
+  (0, 22, 4, 10),
+  (0, 24, 4, 10),
+  (0, 25, 4, 10),
+  (0, 26, 4, 10),
+  (0, 27, 4, 10),
+  (0, 1, 5, 5),
+  (0, 5, 5, 5),
+  (0, 32, 5, 5),
+  (0, 34, 5, 5),
+  (0, 7, 6, 10),
+  (0, 8, 6, 10),
+  (0, 13, 6, 10),
+  (0, 16, 6, 20),
+  (0, 1, 7, 10),
+  (0, 2, 7, 15),
+  (0, 10, 7, 5),
+  (0, 13, 7, 5),
+  (0, 12, 9, 5),
+  (0, 21, 9, 5),
+  (0, 2, 10, 30),
+  (0, 9, 10, 10),
+  (0, 17, 10, 10),
+  (0, 18, 10, 10),
+  (0, 19, 10, 5),
+  (0, 28, 10, 15),
+  (0, 29, 10, 10);
