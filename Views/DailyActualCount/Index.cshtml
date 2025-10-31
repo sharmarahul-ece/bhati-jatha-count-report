@@ -144,38 +144,69 @@
     function renderTable(data) {
       const tbody = document.getElementById('dacTableBody');
       tbody.innerHTML = '';
+
       data.forEach(item => {
+        // Calculate the displayed Sewadar Count (from nominal roll or manual override)
+        const displaySewadarCount = item.nominalRollFound
+          ? (item.nominalRollSewadarCount ?? 0)
+          : (item.manualSewadarCount ?? 0);
+
+        // Determine if there is a mismatch between Count and Sewadar Count
+        const isMismatch = (item.count ?? 0) !== displaySewadarCount;
+
+        // Row highlight if mismatch
+        const rowHighlight = isMismatch ? 'background-color:#ffeaea;' : '';
+
+        // Get display names for center and sewa type
+        const centerName = item.center?.centerName
+          || (centers.find(c => c.id === item.centerId)?.centerName)
+          || '-';
+        const sewaTypeName = item.sewaType?.sewaName
+          || (sewaTypes.find(s => s.id === item.sewaTypeId)?.sewaName)
+          || '-';
+
+        // Nominal Roll Found column
+        const foundText = item.nominalRollFound ? 'Yes' : 'No';
+
+        // Cell highlights
+        const countCellStyle = isMismatch ? 'background-color:#ffeaea;' : '';
+        const sewadarCountCellStyle = isMismatch ? 'background-color:#ffeaea;' : '';
+        const nominalRollTokenCellStyle = item.nominalRollFound ? 'background-color:#eaffea;' : 'background-color:#ffeaea;';
+        const foundCellStyle = item.nominalRollFound ? 'background-color:#eaffea;' : 'background-color:#ffeaea;';
+
+        // Sewadar Count cell (input if not found, else value)
+        let sewadarCountCell = '';
+        // Use the same style for both span and input
+        if (item.nominalRollFound) {
+          sewadarCountCell = `<span style='display:inline-block;width:90px;${sewadarCountCellStyle}'>${item.nominalRollSewadarCount ?? '-'}</span>`;
+        } else {
+          sewadarCountCell = `<input type='number' class='form-control form-control-sm manual-sewadar-count-input' data-id='${item.id}' value='${item.manualSewadarCount ?? ''}' min='0' style='width:90px;${sewadarCountCellStyle}' />`;
+        }
+
+        // Build the row HTML
         const tr = document.createElement('tr');
         tr.setAttribute('data-id', item.id);
-        // Prefer navigation property if present, fallback to lookup
-        const centerName = item.center?.centerName || (centers.find(c => c.id === item.centerId)?.centerName) || '-';
-        const sewaTypeName = item.sewaType?.sewaName || (sewaTypes.find(s => s.id === item.sewaTypeId)?.sewaName) || '-';
-        const found = item.nominalRollFound ? 'Yes' : 'No';
-        let sewadarCountCell = '';
-        if (item.nominalRollFound) {
-          sewadarCountCell = `<span>${item.nominalRollSewadarCount ?? '-'}</span>`;
-        } else {
-          sewadarCountCell = `<input type='number' class='form-control form-control-sm manual-sewadar-count-input' data-id='${item.id}' value='${item.manualSewadarCount ?? ''}' min='0' style='width:90px;' />`;
-        }
+        if (rowHighlight) tr.setAttribute('style', rowHighlight);
         tr.innerHTML = `
-                          <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
-                          <td>${centerName}</td>
-                          <td>${sewaTypeName}</td>
-                          <td>${item.count ?? '-'}</td>
-                          <td>${item.nominalRollToken ?? '-'}</td>
-                          <td>${found}</td>
-                          <td>${sewadarCountCell}</td>
-                          <td>
-                            <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
-                              <i class="bi bi-pencil"></i> Edit
-                            </button>
-                            <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
-                              <i class="bi bi-trash"></i> Delete
-                            </button>
-                          </td>
-                        `;
+              <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
+              <td>${centerName}</td>
+              <td>${sewaTypeName}</td>
+              <td style='${countCellStyle}'>${item.count ?? '-'}</td>
+              <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
+              <td style='${foundCellStyle}'>${foundText}</td>
+              <td>${sewadarCountCell}</td>
+              <td>
+                <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
+                  <i class="bi bi-trash"></i> Delete
+                </button>
+              </td>
+            `;
         tbody.appendChild(tr);
       });
+
       // Add event listeners for manual override inputs
       document.querySelectorAll('.manual-sewadar-count-input').forEach(input => {
         input.addEventListener('change', function () {
