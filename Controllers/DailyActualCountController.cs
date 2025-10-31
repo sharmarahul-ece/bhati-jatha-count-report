@@ -22,12 +22,16 @@ namespace bhati_jatha_count_report.Controllers
     public async Task<IActionResult> Index()
     {
       var allCounts = _service.GetAll().ToList();
+      var centersList = (await _centerService.GetAllCentersAsync()).ToList();
+      var sewaTypesList = (await _sewaTypeService.GetAllSewaTypesAsync()).ToList();
       var nominalRolls = (await _sewaNominalRollService.Query(null, null, null, null)).ToList();
       var vm = new Models.ViewModels.DailyActualCountPageViewModel
       {
         DailyActualCounts = allCounts.Select(dac =>
         {
           var match = nominalRolls.FirstOrDefault(nr => nr.NominalRollToken == dac.NominalRollToken);
+          var centerName = centersList.FirstOrDefault(c => c.Id == dac.CenterId)?.CenterName;
+          var sewaTypeName = sewaTypesList.FirstOrDefault(s => s.Id == dac.SewaTypeId)?.SewaName;
           return new Models.ViewModels.DailyActualCountViewModel
           {
             Id = dac.Id,
@@ -38,11 +42,13 @@ namespace bhati_jatha_count_report.Controllers
             NominalRollToken = dac.NominalRollToken,
             NominalRollFound = match != null,
             NominalRollSewadarCount = match?.TotalSewadars,
-            ManualSewadarCount = dac.ManualSewadarCount
+            ManualSewadarCount = dac.ManualSewadarCount,
+            CenterName = centerName,
+            SewaTypeName = sewaTypeName
           };
         }).ToList(),
-        Centers = (await _centerService.GetAllCentersAsync()).ToList(),
-        SewaTypes = (await _sewaTypeService.GetAllSewaTypesAsync()).ToList()
+        Centers = centersList,
+        SewaTypes = sewaTypesList
       };
       return View(vm);
     }
@@ -116,10 +122,14 @@ namespace bhati_jatha_count_report.Controllers
     public async Task<IActionResult> GetFiltered(DateTime? fromDate, DateTime? toDate, int? centerId, int? sewaTypeId)
     {
       var filteredData = _service.GetFiltered(fromDate, toDate, centerId, sewaTypeId).ToList();
+      var centersList = (await _centerService.GetAllCentersAsync()).ToList();
+      var sewaTypesList = (await _sewaTypeService.GetAllSewaTypesAsync()).ToList();
       var nominalRolls = (await _sewaNominalRollService.Query(null, null, null, null)).ToList();
       var result = filteredData.Select(dac =>
       {
         var match = nominalRolls.FirstOrDefault(nr => nr.NominalRollToken == dac.NominalRollToken);
+        var centerName = centersList.FirstOrDefault(c => c.Id == dac.CenterId)?.CenterName;
+        var sewaTypeName = sewaTypesList.FirstOrDefault(s => s.Id == dac.SewaTypeId)?.SewaName;
         return new Models.ViewModels.DailyActualCountViewModel
         {
           Id = dac.Id,
@@ -130,7 +140,9 @@ namespace bhati_jatha_count_report.Controllers
           NominalRollToken = dac.NominalRollToken,
           NominalRollFound = match != null,
           NominalRollSewadarCount = match?.TotalSewadars,
-          ManualSewadarCount = dac.ManualSewadarCount
+          ManualSewadarCount = dac.ManualSewadarCount,
+          CenterName = centerName,
+          SewaTypeName = sewaTypeName
         };
       }).ToList();
       return Json(new { success = true, data = result });

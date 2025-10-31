@@ -27,5 +27,9 @@ namespace bhati_jatha_count_report.Models.ViewModels
     public int? NominalRollSewadarCount { get; set; }
     public int? ManualSewadarCount { get; set; }
     public int DisplaySewadarCount => NominalRollFound ? (NominalRollSewadarCount ?? 0) : (ManualSewadarCount ?? 0);
+
+    // For display in the view
+    public string? CenterName { get; set; }
+    public string? SewaTypeName { get; set; }
   }
 }
