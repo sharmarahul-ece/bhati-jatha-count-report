@@ -10,7 +10,6 @@ namespace bhati_jatha_count_report.Models.ViewModels
     [Required]
     public DateTime Date { get; set; }
 
-
     [Required]
     public int CenterId { get; set; }
 
@@ -21,6 +20,12 @@ namespace bhati_jatha_count_report.Models.ViewModels
     public int Count { get; set; }
 
     [Required]
-    public string NominalRollToken { get; set; }
+    public string? NominalRollToken { get; set; }
+
+    // New fields for nominal roll integration and manual override
+    public bool NominalRollFound { get; set; }
+    public int? NominalRollSewadarCount { get; set; }
+    public int? ManualSewadarCount { get; set; }
+    public int DisplaySewadarCount => NominalRollFound ? (NominalRollSewadarCount ?? 0) : (ManualSewadarCount ?? 0);
   }
 }

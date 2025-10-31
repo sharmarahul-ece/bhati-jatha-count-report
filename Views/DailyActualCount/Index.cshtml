@@ -51,6 +51,8 @@
           <th>Sewa Type</th>
           <th>Count</th>
           <th>Nominal Roll Token</th>
+          <th>Nominal Roll Found</th>
+          <th>Sewadar Count</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -148,22 +150,41 @@
         // Prefer navigation property if present, fallback to lookup
         const centerName = item.center?.centerName || (centers.find(c => c.id === item.centerId)?.centerName) || '-';
         const sewaTypeName = item.sewaType?.sewaName || (sewaTypes.find(s => s.id === item.sewaTypeId)?.sewaName) || '-';
+        const found = item.nominalRollFound ? 'Yes' : 'No';
+        let sewadarCountCell = '';
+        if (item.nominalRollFound) {
+          sewadarCountCell = `<span>${item.nominalRollSewadarCount ?? '-'}</span>`;
+        } else {
+          sewadarCountCell = `<input type='number' class='form-control form-control-sm manual-sewadar-count-input' data-id='${item.id}' value='${item.manualSewadarCount ?? ''}' min='0' style='width:90px;' />`;
+        }
         tr.innerHTML = `
-                        <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
-                        <td>${centerName}</td>
-                        <td>${sewaTypeName}</td>
-                        <td>${item.count ?? '-'}</td>
-                        <td>${item.nominalRollToken ?? '-'}</td>
-                        <td>
-                          <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
-                            <i class="bi bi-pencil"></i> Edit
-                          </button>
-                          <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
-                            <i class="bi bi-trash"></i> Delete
-                          </button>
-                        </td>
-                      `;
+                          <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
+                          <td>${centerName}</td>
+                          <td>${sewaTypeName}</td>
+                          <td>${item.count ?? '-'}</td>
+                          <td>${item.nominalRollToken ?? '-'}</td>
+                          <td>${found}</td>
+                          <td>${sewadarCountCell}</td>
+                          <td>
+                            <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
+                              <i class="bi bi-pencil"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
+                              <i class="bi bi-trash"></i> Delete
+                            </button>
+                          </td>
+                        `;
         tbody.appendChild(tr);
+      });
+      // Add event listeners for manual override inputs
+      document.querySelectorAll('.manual-sewadar-count-input').forEach(input => {
+        input.addEventListener('change', function () {
+          const id = this.getAttribute('data-id');
+          const value = this.value;
+          // Find the item in dacData and update
+          const item = dacData.find(x => x.id == id);
+          if (item) item.manualSewadarCount = value ? parseInt(value) : null;
+        });
       });
     }
 
@@ -247,13 +268,21 @@
     });
     function saveDac() {
       const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+      const id = document.getElementById('dacId').value || 0;
+      let manualSewadarCount = null;
+      // If editing, try to get manual override from table input
+      if (id) {
+        const input = document.querySelector(`.manual-sewadar-count-input[data-id='${id}']`);
+        if (input) manualSewadarCount = input.value ? parseInt(input.value) : null;
+      }
       const data = {
-        Id: document.getElementById('dacId').value || 0,
+        Id: id,
         Date: document.getElementById('dacDate').value,
         CenterId: document.getElementById('dacCenterId').value,
         SewaTypeId: document.getElementById('dacSewaTypeId').value,
         Count: document.getElementById('dacCount').value,
-        NominalRollToken: document.getElementById('dacNominalRollToken').value
+        NominalRollToken: document.getElementById('dacNominalRollToken').value,
+        ManualSewadarCount: manualSewadarCount
       };
       fetch('/DailyActualCount/Save', {
         method: 'POST',

@@ -9,19 +9,38 @@ namespace bhati_jatha_count_report.Controllers
     private readonly IDailyActualCountService _service;
     private readonly ICenterService _centerService;
     private readonly ISewaTypeService _sewaTypeService;
+    private readonly ISewaNominalRollService _sewaNominalRollService;
 
-    public DailyActualCountController(IDailyActualCountService service, ICenterService centerService, ISewaTypeService sewaTypeService)
+    public DailyActualCountController(IDailyActualCountService service, ICenterService centerService, ISewaTypeService sewaTypeService, ISewaNominalRollService sewaNominalRollService)
     {
       _service = service;
       _centerService = centerService;
       _sewaTypeService = sewaTypeService;
+      _sewaNominalRollService = sewaNominalRollService;
     }
 
     public async Task<IActionResult> Index()
     {
+      var allCounts = _service.GetAll().ToList();
+      var nominalRolls = (await _sewaNominalRollService.Query(null, null, null, null)).ToList();
       var vm = new Models.ViewModels.DailyActualCountPageViewModel
       {
-        DailyActualCounts = _service.GetAll().ToList(),
+        DailyActualCounts = allCounts.Select(dac =>
+        {
+          var match = nominalRolls.FirstOrDefault(nr => nr.NominalRollToken == dac.NominalRollToken);
+          return new Models.ViewModels.DailyActualCountViewModel
+          {
+            Id = dac.Id,
+            Date = dac.Date,
+            CenterId = dac.CenterId,
+            SewaTypeId = dac.SewaTypeId,
+            Count = dac.Count,
+            NominalRollToken = dac.NominalRollToken,
+            NominalRollFound = match != null,
+            NominalRollSewadarCount = match?.TotalSewadars,
+            ManualSewadarCount = dac.ManualSewadarCount
+          };
+        }).ToList(),
         Centers = (await _centerService.GetAllCentersAsync()).ToList(),
         SewaTypes = (await _sewaTypeService.GetAllSewaTypesAsync()).ToList()
       };
@@ -37,6 +56,12 @@ namespace bhati_jatha_count_report.Controllers
         return Json(new { success = false, message = "Invalid data", errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
       }
 
+      // Try to find nominal roll for this token
+      var nominalRoll = _sewaNominalRollService
+        .Query(null, null, null, null)
+        .Result
+        .FirstOrDefault(r => r.NominalRollToken == model.NominalRollToken);
+
       if (model.Id == 0)
       {
         var entity = new DailyActualCount
@@ -45,7 +70,8 @@ namespace bhati_jatha_count_report.Controllers
           CenterId = model.CenterId,
           SewaTypeId = model.SewaTypeId,
           Count = model.Count,
-          NominalRollToken = model.NominalRollToken
+          NominalRollToken = model.NominalRollToken,
+          ManualSewadarCount = nominalRoll == null ? model.ManualSewadarCount : null
         };
         _service.Add(entity);
         return Json(new { success = true, message = "Created successfully" });
@@ -60,6 +86,7 @@ namespace bhati_jatha_count_report.Controllers
         entity.SewaTypeId = model.SewaTypeId;
         entity.Count = model.Count;
         entity.NominalRollToken = model.NominalRollToken;
+        entity.ManualSewadarCount = nominalRoll == null ? model.ManualSewadarCount : null;
         _service.Update(entity);
         return Json(new { success = true, message = "Updated successfully" });
       }
@@ -86,10 +113,27 @@ namespace bhati_jatha_count_report.Controllers
     }
 
     [HttpGet]
-    public IActionResult GetFiltered(DateTime? fromDate, DateTime? toDate, int? centerId, int? sewaTypeId)
+    public async Task<IActionResult> GetFiltered(DateTime? fromDate, DateTime? toDate, int? centerId, int? sewaTypeId)
     {
-      var filteredData = _service.GetFiltered(fromDate, toDate, centerId, sewaTypeId);
-      return Json(new { success = true, data = filteredData });
+      var filteredData = _service.GetFiltered(fromDate, toDate, centerId, sewaTypeId).ToList();
+      var nominalRolls = (await _sewaNominalRollService.Query(null, null, null, null)).ToList();
+      var result = filteredData.Select(dac =>
+      {
+        var match = nominalRolls.FirstOrDefault(nr => nr.NominalRollToken == dac.NominalRollToken);
+        return new Models.ViewModels.DailyActualCountViewModel
+        {
+          Id = dac.Id,
+          Date = dac.Date,
+          CenterId = dac.CenterId,
+          SewaTypeId = dac.SewaTypeId,
+          Count = dac.Count,
+          NominalRollToken = dac.NominalRollToken,
+          NominalRollFound = match != null,
+          NominalRollSewadarCount = match?.TotalSewadars,
+          ManualSewadarCount = dac.ManualSewadarCount
+        };
+      }).ToList();
+      return Json(new { success = true, data = result });
     }
   }
 }

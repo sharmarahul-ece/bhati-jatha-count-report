@@ -29,9 +29,9 @@ namespace bhati_jatha_count_report.Models.Entities
     public int Count { get; set; }
 
     [ForeignKey("CenterId")]
-    public Center Center { get; set; }
+    public Center? Center { get; set; }
 
     [ForeignKey("SewaTypeId")]
-    public SewaType SewaType { get; set; }
+    public SewaType? SewaType { get; set; }
   }
 }

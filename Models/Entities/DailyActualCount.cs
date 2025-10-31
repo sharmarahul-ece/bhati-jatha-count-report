@@ -17,17 +17,20 @@ namespace bhati_jatha_count_report.Models.Entities
     [Required]
     [ForeignKey("Center")]
     public int CenterId { get; set; }
-    public Center Center { get; set; }
+    public Center? Center { get; set; }
 
     [Required]
     [ForeignKey("SewaType")]
     public int SewaTypeId { get; set; }
-    public SewaType SewaType { get; set; }
+    public SewaType? SewaType { get; set; }
 
     [Required]
     public int Count { get; set; }
 
     [Required]
-    public string NominalRollToken { get; set; }
+    public string? NominalRollToken { get; set; }
+
+    // Allows manual override of sewadars count if nominal roll not found
+    public int? ManualSewadarCount { get; set; }
   }
 }

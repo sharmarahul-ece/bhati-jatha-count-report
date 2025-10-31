@@ -11,10 +11,12 @@ namespace bhati_jatha_count_report.Services.Implementations
   public class DailyActualCountService : IDailyActualCountService
   {
     private readonly ApplicationDbContext _context;
+    private readonly ISewaNominalRollService _sewaNominalRollService;
 
-    public DailyActualCountService(ApplicationDbContext context)
+    public DailyActualCountService(ApplicationDbContext context, ISewaNominalRollService sewaNominalRollService)
     {
       _context = context;
+      _sewaNominalRollService = sewaNominalRollService;
     }
 
     public IEnumerable<DailyActualCount> GetAll()
