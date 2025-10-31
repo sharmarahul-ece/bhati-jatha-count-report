@@ -50,9 +50,9 @@
           <th>Center</th>
           <th>Sewa Type</th>
           <th>Count</th>
-          <th>Nominal Roll Token</th>
-          <th>Nominal Roll Found</th>
-          <th>Sewadar Count</th>
+          <th>SRS Token</th>
+          <th>SRS Found</th>
+          <th>SRS Count</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -103,8 +103,12 @@
               <input type="number" class="form-control" id="dacCount" required />
             </div>
             <div class="mb-3">
-              <label for="dacNominalRollToken" class="form-label">Nominal Roll Token</label>
+              <label for="dacNominalRollToken" class="form-label">SRS Token</label>
               <textarea class="form-control" id="dacNominalRollToken" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="dacManualSewadarCount" class="form-label">Manual SRS Count</label>
+              <input type="number" class="form-control" id="dacManualSewadarCount" min="0" />
             </div>
           </form>
         </div>
@@ -165,7 +169,7 @@
           || (sewaTypes.find(s => s.id === item.sewaTypeId)?.sewaName)
           || '-';
 
-        // Nominal Roll Found column
+        // SRS Found column
         const foundText = item.nominalRollFound ? 'Yes' : 'No';
 
         // Cell highlights
@@ -174,13 +178,13 @@
         const nominalRollTokenCellStyle = item.nominalRollFound ? 'background-color:#eaffea;' : 'background-color:#ffeaea;';
         const foundCellStyle = item.nominalRollFound ? 'background-color:#eaffea;' : 'background-color:#ffeaea;';
 
-        // Sewadar Count cell (input if not found, else value)
-        let sewadarCountCell = '';
+        // SRS Count cell (input if not found, else value)
+        let srsCountCell = '';
         // Use the same style for both span and input
         if (item.nominalRollFound) {
-          sewadarCountCell = `<span style='display:inline-block;width:90px;${sewadarCountCellStyle}'>${item.nominalRollSewadarCount ?? '-'}</span>`;
+          srsCountCell = `<span style='display:inline-block;width:90px;${sewadarCountCellStyle}'>${item.nominalRollSewadarCount ?? '-'}</span>`;
         } else {
-          sewadarCountCell = `<input type='number' class='form-control form-control-sm manual-sewadar-count-input' data-id='${item.id}' value='${item.manualSewadarCount ?? ''}' min='0' style='width:90px;${sewadarCountCellStyle}' />`;
+          srsCountCell = `<input type='number' class='form-control form-control-sm manual-sewadar-count-input' data-id='${item.id}' value='${item.manualSewadarCount ?? ''}' min='0' style='width:90px;${sewadarCountCellStyle}' />`;
         }
 
         // Build the row HTML
@@ -188,22 +192,22 @@
         tr.setAttribute('data-id', item.id);
         if (rowHighlight) tr.setAttribute('style', rowHighlight);
         tr.innerHTML = `
-              <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
-              <td>${centerName}</td>
-              <td>${sewaTypeName}</td>
-              <td style='${countCellStyle}'>${item.count ?? '-'}</td>
-              <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
-              <td style='${foundCellStyle}'>${foundText}</td>
-              <td>${sewadarCountCell}</td>
-              <td>
-                <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
-                  <i class="bi bi-pencil"></i> Edit
-                </button>
-                <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
-                  <i class="bi bi-trash"></i> Delete
-                </button>
-              </td>
-            `;
+                  <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
+                  <td>${centerName}</td>
+                  <td>${sewaTypeName}</td>
+                  <td style='${countCellStyle}'>${item.count ?? '-'}</td>
+                  <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
+                  <td style='${foundCellStyle}'>${foundText}</td>
+                  <td>${srsCountCell}</td>
+                  <td>
+                    <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
+                      <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+                  </td>
+                `;
         tbody.appendChild(tr);
       });
 
@@ -276,6 +280,7 @@
               document.getElementById('dacSewaTypeId').value = d.sewaTypeId;
               document.getElementById('dacCount').value = d.count;
               document.getElementById('dacNominalRollToken').value = d.nominalRollToken;
+              document.getElementById('dacManualSewadarCount').value = d.manualSewadarCount ?? '';
               document.getElementById('modalTitle').textContent = 'Edit Record';
               new bootstrap.Modal(document.getElementById('dacModal')).show();
             }
@@ -305,6 +310,11 @@
       if (id) {
         const input = document.querySelector(`.manual-sewadar-count-input[data-id='${id}']`);
         if (input) manualSewadarCount = input.value ? parseInt(input.value) : null;
+      }
+      // Prefer value from modal input if present
+      let manualSewadarCountField = document.getElementById('dacManualSewadarCount');
+      if (manualSewadarCountField && manualSewadarCountField.value !== '') {
+        manualSewadarCount = parseInt(manualSewadarCountField.value);
       }
       const data = {
         Id: id,

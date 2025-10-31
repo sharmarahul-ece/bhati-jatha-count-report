@@ -71,7 +71,7 @@ namespace bhati_jatha_count_report.Controllers
           SewaTypeId = model.SewaTypeId,
           Count = model.Count,
           NominalRollToken = model.NominalRollToken,
-          ManualSewadarCount = nominalRoll == null ? model.ManualSewadarCount : null
+          ManualSewadarCount = model.ManualSewadarCount // Always save the manual count, use for display only if nominal roll not found
         };
         _service.Add(entity);
         return Json(new { success = true, message = "Created successfully" });
@@ -86,7 +86,7 @@ namespace bhati_jatha_count_report.Controllers
         entity.SewaTypeId = model.SewaTypeId;
         entity.Count = model.Count;
         entity.NominalRollToken = model.NominalRollToken;
-        entity.ManualSewadarCount = nominalRoll == null ? model.ManualSewadarCount : null;
+        entity.ManualSewadarCount = model.ManualSewadarCount; // Always save the manual count
         _service.Update(entity);
         return Json(new { success = true, message = "Updated successfully" });
       }
