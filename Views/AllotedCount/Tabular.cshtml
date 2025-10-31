@@ -22,7 +22,7 @@
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
-                    <th>Center \ Sewa Type</th>
+                    <th style="width: 220px;">Center \ Sewa Type</th>
                     @foreach (var sewaType in Model.SewaTypes)
                     {
                         <th>@sewaType.SewaName</th>
@@ -34,7 +34,7 @@
                 @foreach (var center in Model.Centers)
                 {
                     <tr>
-                        <th>@center.CenterName</th>
+                        <th style="width: 220px; font-size:0.85em;">@center.CenterName</th>
                         @{
                             int rowTotal = 0;
                         }
