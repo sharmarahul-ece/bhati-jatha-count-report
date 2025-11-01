@@ -28,12 +28,29 @@
       <tbody>
         @foreach (var pending in Model.Pending)
         {
-          <tr>
-            <td>@pending.CenterName</td>
-            <td>@pending.SewaTypeName</td>
+          var rowClass = pending.IsExcluded ? "excluded-row" : "";
+          <tr class="@rowClass">
+            <td colspan="2" style="padding:0;">
+              <form method="post" action="@Url.Action("ToggleExclude", "AllotedCount")" style="margin:0;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="centerId" value="@pending.CenterId" />
+                <input type="hidden" name="sewaTypeId" value="@pending.SewaTypeId" />
+                <input type="hidden" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                <button type="submit" class="toggle-exclude-btn" style="width:100%;border:none;background:transparent;padding:8px 0;cursor:pointer;">
+                  <span style="display:inline-block;width:49%;text-align:left;">@pending.CenterName</span>
+                  <span style="display:inline-block;width:49%;text-align:right;">@pending.SewaTypeName</span>
+                </button>
+              </form>
+            </td>
           </tr>
         }
       </tbody>
+  <style>
+    .excluded-row {
+      background-color: #d4edda !important;
+      transition: background 0.2s;
+    }
+  </style>
     </table>
     @if (!Model.Pending.Any())
     {
@@ -61,6 +78,7 @@ Pending Actual Count
       alert('Pending list copied to clipboard!');
     }
   </script>
+@Html.AntiForgeryToken()
 </div>
 alert('Pending list copied to clipboard!');
 }

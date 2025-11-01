@@ -12,8 +12,11 @@ namespace bhati_jatha_count_report.Models.ViewModels
 
     public class PendingItem
     {
+      public int CenterId { get; set; }
+      public int SewaTypeId { get; set; }
       public string CenterName { get; set; } = string.Empty;
       public string SewaTypeName { get; set; } = string.Empty;
+      public bool IsExcluded { get; set; } = false;
     }
   }
 }

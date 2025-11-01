@@ -144,16 +144,22 @@ namespace bhati_jatha_count_report.Controllers
       var allotedCounts = _service.GetAll().ToList();
       var actualCounts = HttpContext.RequestServices.GetService(typeof(IDailyActualCountService)) is IDailyActualCountService actualService
         ? actualService.GetAll().ToList() : new List<bhati_jatha_count_report.Models.Entities.DailyActualCount>();
+      var excludedService = HttpContext.RequestServices.GetService(typeof(IExcludedForDayService)) as IExcludedForDayService;
       DateTime selectedDate = date ?? DateTime.Today;
       int selectedWeekDay = (int)selectedDate.DayOfWeek;
+
+      var excluded = excludedService != null ? await excludedService.GetExcludedAsync(selectedDate) : new List<ExcludedForDay>();
 
       var pending = allotedCounts
         .Where(x => (int)x.WeekDay == selectedWeekDay)
         .Where(x => !actualCounts.Any(a => a.Date.Date == selectedDate.Date && a.CenterId == x.CenterId && a.SewaTypeId == x.SewaTypeId))
         .Select(x => new Models.ViewModels.PendingSimpleListViewModel.PendingItem
         {
+          CenterId = x.CenterId,
+          SewaTypeId = x.SewaTypeId,
           CenterName = centers.FirstOrDefault(c => c.Id == x.CenterId)?.CenterName ?? $"Center {x.CenterId}",
-          SewaTypeName = sewaTypes.FirstOrDefault(s => s.Id == x.SewaTypeId)?.SewaName ?? $"SewaType {x.SewaTypeId}"
+          SewaTypeName = sewaTypes.FirstOrDefault(s => s.Id == x.SewaTypeId)?.SewaName ?? $"SewaType {x.SewaTypeId}",
+          IsExcluded = excluded.Any(e => e.CenterId == x.CenterId && e.SewaTypeId == x.SewaTypeId)
         })
         .ToList();
 
@@ -163,6 +169,25 @@ namespace bhati_jatha_count_report.Controllers
         Pending = pending
       };
       return View(vm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleExclude(int centerId, int sewaTypeId, DateTime date)
+    {
+      var excludedService = HttpContext.RequestServices.GetService(typeof(IExcludedForDayService)) as IExcludedForDayService;
+      if (excludedService == null)
+        return RedirectToAction("PendingSimple", new { date = date.ToString("yyyy-MM-dd") });
+      bool isExcluded = await excludedService.IsExcludedAsync(centerId, sewaTypeId, date);
+      if (isExcluded)
+      {
+        await excludedService.RemoveAsync(centerId, sewaTypeId, date);
+      }
+      else
+      {
+        await excludedService.AddAsync(centerId, sewaTypeId, date);
+      }
+      return RedirectToAction("PendingSimple", new { date = date.ToString("yyyy-MM-dd") });
     }
   }
 }

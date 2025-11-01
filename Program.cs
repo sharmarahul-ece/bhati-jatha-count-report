@@ -15,6 +15,8 @@ builder.Services.AddScoped<ISewaNominalRollService, SewaNominalRollService>();
 builder.Services.AddScoped<IDailyActualCountService, DailyActualCountService>();
 builder.Services.AddScoped<IAllotedCountService, AllotedCountService>();
 
+builder.Services.AddScoped<IExcludedForDayService, ExcludedForDayService>();
+
 // Add DbContext configuration for PostgreSQL
 var pgConnStr = Environment.GetEnvironmentVariable("SECURE_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
