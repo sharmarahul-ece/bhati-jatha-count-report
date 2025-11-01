@@ -226,13 +226,18 @@ namespace bhati_jatha_count_report.Controllers
           return NotFound("Excel template not found. Please ensure 'actual_counts_template.xlsx' exists in wwwroot/templates/");
         }
 
-        // Load the Excel template
-        using (var workbook = new XLWorkbook(templatePath))
+        // Load the template into memory first
+        byte[] templateBytes = System.IO.File.ReadAllBytes(templatePath);
+        using (var templateStream = new MemoryStream(templateBytes))
+        using (var workbook = new XLWorkbook(templateStream))
         {
           var worksheet = workbook.Worksheet(1); // Get the first worksheet
 
+          Console.WriteLine($"Worksheet name: {worksheet.Name}, Row count: {worksheet.RowsUsed().Count()}");
+
           // Fill the date in cell C2
           worksheet.Cell("C2").Value = selectedDate.ToString("dd/MM/yyyy");
+          Console.WriteLine($"Set date in C2: {worksheet.Cell("C2").Value}");
 
           // Fill Sewa Type headers starting from E3
           int sewaTypeColumn = 5; // Column E
@@ -282,12 +287,15 @@ namespace bhati_jatha_count_report.Controllers
           }
 
           Console.WriteLine($"Total rows filled: {currentRow - 5}");
+          Console.WriteLine($"Verifying C2 value before save: {worksheet.Cell("C2").Value}");
+          Console.WriteLine($"Verifying B5 value before save: {worksheet.Cell("B5").Value}");
 
           // Save to memory stream and return as file
-          using (var stream = new MemoryStream())
+          using (var outputStream = new MemoryStream())
           {
-            workbook.SaveAs(stream);
-            var fileBytes = stream.ToArray();
+            workbook.SaveAs(outputStream);
+            outputStream.Position = 0; // Ensure stream is at the beginning before reading
+            var fileBytes = outputStream.ToArray();
 
             Console.WriteLine($"Excel file generated successfully. Size: {fileBytes.Length} bytes");
 
