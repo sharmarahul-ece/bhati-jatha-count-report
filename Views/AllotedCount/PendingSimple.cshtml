@@ -17,40 +17,64 @@
       <i class="bi bi-clipboard"></i> Copy List
     </button>
   </div>
-  <div class="table-responsive">
-    <table class="table table-bordered table-striped">
+  <div class="table-responsive d-flex justify-content-center">
+    <table class="table table-bordered table-striped" style="max-width: 420px; min-width: 320px; font-size: 0.95rem; margin: 0 auto;">
       <thead>
         <tr>
           <th>Center</th>
           <th>Sewa Type</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
         @foreach (var pending in Model.Pending)
         {
-          var rowClass = pending.IsExcluded ? "excluded-row" : "";
-          <tr class="@rowClass">
-            <td colspan="2" style="padding:0;">
+          var btnClass = pending.IsExcluded ? "excluded-row" : "";
+          <tr>
+            <td style="padding:0;">
               <form method="post" action="@Url.Action("ToggleExclude", "AllotedCount")" style="margin:0;">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="centerId" value="@pending.CenterId" />
                 <input type="hidden" name="sewaTypeId" value="@pending.SewaTypeId" />
                 <input type="hidden" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
-                <button type="submit" class="toggle-exclude-btn" style="width:100%;border:none;background:transparent;padding:8px 0;cursor:pointer;">
-                  <span style="display:inline-block;width:49%;text-align:left;">@pending.CenterName</span>
-                  <span style="display:inline-block;width:49%;text-align:right;">@pending.SewaTypeName</span>
+                <button type="submit" class="toggle-exclude-btn @btnClass" style="width:100%;border:none;background:transparent;padding:8px 0;cursor:pointer;">
+                  <span style="display:inline-block;width:100%;text-align:left;">@pending.CenterName</span>
                 </button>
               </form>
+            </td>
+            <td style="padding:0;">
+              <form method="post" action="@Url.Action("ToggleExclude", "AllotedCount")" style="margin:0;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="centerId" value="@pending.CenterId" />
+                <input type="hidden" name="sewaTypeId" value="@pending.SewaTypeId" />
+                <input type="hidden" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                <button type="submit" class="toggle-exclude-btn @btnClass" style="width:100%;border:none;background:transparent;padding:8px 0;cursor:pointer;">
+                  <span style="display:inline-block;width:100%;text-align:left;">@pending.SewaTypeName</span>
+                </button>
+              </form>
+            </td>
+            <td style="vertical-align:middle;text-align:center;">
+              @(pending.IsExcluded ? "Excluded" : "")
             </td>
           </tr>
         }
       </tbody>
-  <style>
-    .excluded-row {
-      background-color: #d4edda !important;
-      transition: background 0.2s;
-    }
-  </style>
+      <style>
+        .excluded-row {
+          background-color: #d4edda !important;
+          transition: background 0.2s;
+        }
+
+        .table td,
+        .table th {
+          padding: 0.35rem 0.5rem !important;
+        }
+
+        .toggle-exclude-btn {
+          font-size: 0.97rem;
+          padding: 0.25rem 0.5rem !important;
+        }
+      </style>
     </table>
     @if (!Model.Pending.Any())
     {
@@ -60,7 +84,7 @@
 Pending Actual Count
 @{
   int i = 1;
-  foreach (var pending in Model.Pending.OrderBy(p => p.CenterName, System.StringComparer.OrdinalIgnoreCase))
+  foreach (var pending in Model.Pending.Where(p => !p.IsExcluded).OrderBy(p => p.CenterName, System.StringComparer.OrdinalIgnoreCase))
   {
     @($"{i}. {pending.CenterName} - {pending.SewaTypeName}\n")
     i++;
@@ -78,9 +102,7 @@ Pending Actual Count
       alert('Pending list copied to clipboard!');
     }
   </script>
-@Html.AntiForgeryToken()
+  @Html.AntiForgeryToken()
 </div>
-alert('Pending list copied to clipboard!');
-}
 </script>
 </div>
