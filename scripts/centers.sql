@@ -38,7 +38,8 @@ INSERT INTO "Centers" ("Id", "CenterName", "CenterType") VALUES
   (33, 'SULTANPURI', 'C'),
   (34, 'UTTAM NAGAR', 'C'),
   (35, 'VASANT KUNJ', 'C'),
-  (36, 'VIKASPURI', 'C');
+  (36, 'VIKASPURI', 'C'),
+  (37, 'ROHINI', 'C');;
 
 
 SELECT setval(pg_get_serial_sequence('"Centers"', 'Id'), (SELECT MAX("Id") FROM "Centers"));

@@ -15,7 +15,7 @@ public class ApplicationDbContext : DbContext
   public DbSet<SewaNominalRoll> SewaNominalRolls { get; set; }
   public DbSet<DailyActualCount> DailyActualCounts { get; set; }
   public DbSet<AllotedCount> AllotedCounts { get; set; }
-
+  public DbSet<ExcludedForDay> ExcludedForDays { get; set; }
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
@@ -70,6 +70,15 @@ public class ApplicationDbContext : DbContext
         .WithMany()
         .HasForeignKey(e => e.SewaTypeId)
         .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<ExcludedForDay>(entity =>
+    {
+      entity.HasKey(e => new { e.CenterId, e.SewaTypeId, e.Date });
+      entity.Property(e => e.Date).IsRequired();
+      // Optionally add foreign keys if navigation properties are enabled
+      // entity.HasOne<Center>().WithMany().HasForeignKey(e => e.CenterId).OnDelete(DeleteBehavior.Restrict);
+      // entity.HasOne<SewaType>().WithMany().HasForeignKey(e => e.SewaTypeId).OnDelete(DeleteBehavior.Restrict);
     });
   }
 }
