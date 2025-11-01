@@ -4,6 +4,12 @@
 }
 <div class="container">
   <h2 class="mb-4">Manage Daily Actual Counts</h2>
+  <div class="mb-3 position-relative" style="display: flex; align-items: center; gap: 0.5rem;">
+    <button type="button" class="btn btn-outline-secondary btn-sm" id="copyPendingSrsBtn">
+      <i class="bi bi-clipboard"></i> Copy Pending SRS Token
+    </button>
+    <span id="copyDoneAnim" style="display:none; color: green; font-weight: bold; transition: opacity 0.3s;">Copied!</span>
+  </div>
   <form class="row row-cols-lg-auto g-2 align-items-center mb-3" onsubmit="return false;">
     <div class="col-auto">
       <label class="form-label mb-0 me-2" for="filterCenter">Center</label>
@@ -126,6 +132,61 @@
   <script>
     let isEditing = false;
     let dacData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyActualCounts));
+    // --- Copy Pending SRS Token logic ---
+    document.addEventListener('DOMContentLoaded', function () {
+      const copyBtn = document.getElementById('copyPendingSrsBtn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', function () {
+          let data = dacData || [];
+          let pending = data.filter(x => x.nominalRollFound === false || x.nominalRollFound === null || x.nominalRollFound === undefined);
+          let lines = ['Pending SRS Token'];
+          pending.forEach((item, idx) => {
+            let centerName = '-';
+            if (item.centerName) {
+              centerName = item.centerName;
+            } else if (item.center && item.center.centerName) {
+              centerName = item.center.centerName;
+            } else if (window.centers) {
+              const c = window.centers.find(c => c.id === item.centerId);
+              if (c) centerName = c.centerName;
+            }
+            let sewaTypeName = '-';
+            if (item.sewaTypeName) {
+              sewaTypeName = item.sewaTypeName;
+            } else if (item.sewaType && item.sewaType.sewaName) {
+              sewaTypeName = item.sewaType.sewaName;
+            } else if (window.sewaTypes) {
+              const s = window.sewaTypes.find(s => s.id === item.sewaTypeId);
+              if (s) sewaTypeName = s.sewaName;
+            }
+            let srsToken = item.nominalRollToken ?? '-';
+            lines.push(`${idx + 1}. ${centerName} - ${sewaTypeName} - ${srsToken}`);
+          });
+          const textToCopy = lines.join('\n');
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(textToCopy);
+          } else {
+            // fallback for older browsers
+            const temp = document.createElement('textarea');
+            temp.value = textToCopy;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+          }
+          // Show animation/feedback
+          const anim = document.getElementById('copyDoneAnim');
+          if (anim) {
+            anim.style.display = 'inline';
+            anim.style.opacity = 1;
+            setTimeout(() => {
+              anim.style.opacity = 0;
+              setTimeout(() => { anim.style.display = 'none'; anim.style.opacity = 1; }, 400);
+            }, 1200);
+          }
+        });
+      }
+    });
     function resetForm() {
       isEditing = false;
       document.getElementById('dacForm').reset();
@@ -206,23 +267,23 @@
         tr.setAttribute('data-id', item.id);
         if (rowHighlight) tr.setAttribute('style', rowHighlight);
         tr.innerHTML = `
-          <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
-          <td>${centerName}</td>
-          <td>${sewaTypeName}</td>
-          <td style='${countCellStyle}'>${item.count ?? '-'}</td>
-          <td style='${countCellStyle}'>${srsCountCell}</td>
-          <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
-          <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
-          <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
-          <td>
-            <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
-              <i class="bi bi-pencil"></i> Edit
-            </button>
-            <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
-              <i class="bi bi-trash"></i> Delete
-            </button>
-          </td>
-        `;
+                  <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
+                  <td>${centerName}</td>
+                  <td>${sewaTypeName}</td>
+                  <td style='${countCellStyle}'>${item.count ?? '-'}</td>
+                  <td style='${countCellStyle}'>${srsCountCell}</td>
+                  <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
+                  <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
+                  <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
+                  <td>
+                    <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
+                      <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+                  </td>
+                `;
         tbody.appendChild(tr);
       });
 
