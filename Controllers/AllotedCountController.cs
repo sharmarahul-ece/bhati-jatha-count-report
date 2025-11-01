@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using bhati_jatha_count_report.Models.Entities;
 using bhati_jatha_count_report.Services.Interfaces;
 using System.Threading.Tasks;
+using ClosedXML.Excel;
 
 namespace bhati_jatha_count_report.Controllers
 {
@@ -188,6 +189,121 @@ namespace bhati_jatha_count_report.Controllers
         await excludedService.AddAsync(centerId, sewaTypeId, date);
       }
       return RedirectToAction("PendingSimple", new { date = date.ToString("yyyy-MM-dd") });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportActualCountsExcel(DateTime? date)
+    {
+      try
+      {
+        // Get the selected date
+        DateTime selectedDate = date ?? DateTime.Today;
+
+        // Get all required data
+        var centers = (await _centerService.GetAllCentersAsync()).OrderBy(c => c.CenterName).ToList();
+        var sewaTypes = (await _sewaTypeService.GetAllSewaTypesAsync()).OrderBy(s => s.Id).ToList();
+        var actualCountService = HttpContext.RequestServices.GetService(typeof(IDailyActualCountService)) as IDailyActualCountService;
+        var actualCounts = actualCountService?.GetAll().Where(x => x.Date.Date == selectedDate.Date).ToList()
+          ?? new List<DailyActualCount>();
+
+        // Log for debugging
+        Console.WriteLine($"Selected Date: {selectedDate:yyyy-MM-dd}");
+        Console.WriteLine($"Total Centers: {centers.Count}");
+        Console.WriteLine($"Total Sewa Types: {sewaTypes.Count}");
+        Console.WriteLine($"Total Actual Counts for date: {actualCounts.Count}");
+
+        // Filter centers that have at least one actual count for the date
+        var centersWithData = centers.Where(c =>
+          actualCounts.Any(ac => ac.CenterId == c.Id)).ToList();
+
+        Console.WriteLine($"Centers with data: {centersWithData.Count}");
+
+        // Path to the Excel template
+        var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates", "actual_counts_template.xlsx");
+
+        if (!System.IO.File.Exists(templatePath))
+        {
+          return NotFound("Excel template not found. Please ensure 'actual_counts_template.xlsx' exists in wwwroot/templates/");
+        }
+
+        // Load the Excel template
+        using (var workbook = new XLWorkbook(templatePath))
+        {
+          var worksheet = workbook.Worksheet(1); // Get the first worksheet
+
+          // Fill the date in cell C2
+          worksheet.Cell("C2").Value = selectedDate.ToString("dd/MM/yyyy");
+
+          // Fill Sewa Type headers starting from E3
+          int sewaTypeColumn = 5; // Column E
+          foreach (var sewaType in sewaTypes)
+          {
+            worksheet.Cell(3, sewaTypeColumn).Value = sewaType.SewaName;
+            sewaTypeColumn++;
+          }
+
+          // Fill center data starting from row 5
+          int currentRow = 5;
+          int serialNumber = 1;
+
+          foreach (var center in centersWithData)
+          {
+            // Column B: Serial Number
+            worksheet.Cell(currentRow, 2).Value = serialNumber;
+
+            // Column C: Center Name
+            worksheet.Cell(currentRow, 3).Value = center.CenterName;
+
+            // Column D: Center Type
+            worksheet.Cell(currentRow, 4).Value = center.CenterType;
+
+            // Fill actual counts for each sewa type (starting from column E)
+            int dataColumn = 5; // Column E
+            foreach (var sewaType in sewaTypes)
+            {
+              var actualCount = actualCounts.FirstOrDefault(ac =>
+                ac.CenterId == center.Id && ac.SewaTypeId == sewaType.Id);
+
+              if (actualCount != null)
+              {
+                worksheet.Cell(currentRow, dataColumn).Value = actualCount.Count;
+                Console.WriteLine($"Row {currentRow}, Col {dataColumn}: Center {center.CenterName}, Sewa {sewaType.SewaName}, Count {actualCount.Count}");
+              }
+              else
+              {
+                worksheet.Cell(currentRow, dataColumn).Value = string.Empty;
+              }
+
+              dataColumn++;
+            }
+
+            currentRow++;
+            serialNumber++;
+          }
+
+          Console.WriteLine($"Total rows filled: {currentRow - 5}");
+
+          // Save to memory stream and return as file
+          using (var stream = new MemoryStream())
+          {
+            workbook.SaveAs(stream);
+            var fileBytes = stream.ToArray();
+
+            Console.WriteLine($"Excel file generated successfully. Size: {fileBytes.Length} bytes");
+
+            var fileName = $"actual_counts_{selectedDate:yyyy-MM-dd}.xlsx";
+            return File(fileBytes,
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              fileName);
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error: {ex.Message}");
+        Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+        return StatusCode(500, $"Error generating Excel file: {ex.Message}");
+      }
     }
   }
 }
