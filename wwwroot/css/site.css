@@ -1,5 +1,22 @@
 html {
   font-size: 12px;
+  background: #fff !important;
+  color: #212529 !important;
+}
+
+body {
+  background: #fff !important;
+  color: #212529 !important;
+}
+
+/* Force light mode, ignore prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+
+  html,
+  body {
+    background: #fff !important;
+    color: #212529 !important;
+  }
 }
 
 
