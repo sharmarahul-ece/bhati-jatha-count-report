@@ -4,6 +4,7 @@
 }
 <div class="container-fluid">
   <h2 class="mb-3">Alloted vs Actual (Compact)</h2>
+  <button type="button" class="btn btn-sm btn-outline-primary mb-2" onclick="exportActualCountsToCSV()">Export Actual Counts CSV</button>
   <form method="get" class="mb-2">
     <div class="row g-2 align-items-end">
       <div class="col-auto">
@@ -85,6 +86,54 @@
       </tbody>
     </table>
   </div>
+  <script>
+    function exportActualCountsToCSV() {
+      const table = document.querySelector('.pending-actual-table');
+      if (!table) return;
+      let csv = '';
+      // Header row
+      const headerCells = table.querySelectorAll('thead th');
+      let headerRow = [];
+      for (let i = 0; i < headerCells.length; i++) {
+        headerRow.push('"' + headerCells[i].innerText.replace(/\n/g, ' ').trim() + '"');
+      }
+      csv += headerRow.join(',') + '\n';
+
+      // Data rows
+      const rows = table.querySelectorAll('tbody tr');
+      for (let row of rows) {
+        let rowData = [];
+        // First cell: center name
+        const centerCell = row.querySelector('th');
+        rowData.push('"' + (centerCell ? centerCell.innerText.trim() : '') + '"');
+        // Actual counts only (skip alloted)
+        const dataCells = row.querySelectorAll('td');
+        for (let cell of dataCells) {
+          // The actual count is the third child span
+          const spans = cell.querySelectorAll('span');
+          let actual = '';
+          if (spans.length >= 3) {
+            let val = spans[2].innerText.trim();
+            if (val !== '-' && val !== '') {
+              actual = val;
+            }
+          }
+          rowData.push('"' + actual + '"');
+        }
+        csv += rowData.join(',') + '\n';
+      }
+      // Download CSV
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'actual_counts_' + (document.getElementById('date')?.value || 'export') + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
   @if (!Model.Centers.Any() || !Model.SewaTypes.Any())
   {
     <div class="alert alert-info mt-3">No data available for the selected date.</div>
