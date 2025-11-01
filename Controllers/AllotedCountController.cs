@@ -247,20 +247,25 @@ namespace bhati_jatha_count_report.Controllers
             sewaTypeColumn++;
           }
 
-          // Fill center data starting from row 5
-          int currentRow = 5;
+          // Fill center data starting from row 7, inserting a new row for each center
+          int insertRow = 7;
           int serialNumber = 1;
 
           foreach (var center in centersWithData)
           {
-            // Column B: Serial Number
-            worksheet.Cell(currentRow, 2).Value = serialNumber;
+            // Insert a new row at the current position (insertRow)
+            worksheet.Row(insertRow).InsertRowsAbove(1);
 
-            // Column C: Center Name
-            worksheet.Cell(currentRow, 3).Value = center.CenterName;
+            // In columns R and S (18, 19), set formula =SUM(E:Q) for that row
+            worksheet.Cell(insertRow, 18).FormulaA1 = $"SUM(E{insertRow}:Q{insertRow})";
+            worksheet.Cell(insertRow, 19).FormulaA1 = $"SUM(E{insertRow}:Q{insertRow})";
+            // In column T (20), set formula =R-S for that row
+            worksheet.Cell(insertRow, 20).FormulaA1 = $"R{insertRow}-S{insertRow}";
 
-            // Column D: Center Type
-            worksheet.Cell(currentRow, 4).Value = center.CenterType;
+            // Write data to the newly inserted row
+            worksheet.Cell(insertRow, 2).Value = serialNumber;
+            worksheet.Cell(insertRow, 3).Value = center.CenterName;
+            worksheet.Cell(insertRow, 4).Value = center.CenterType;
 
             // Fill actual counts for each sewa type (starting from column E)
             int dataColumn = 5; // Column E
@@ -271,22 +276,40 @@ namespace bhati_jatha_count_report.Controllers
 
               if (actualCount != null)
               {
-                worksheet.Cell(currentRow, dataColumn).Value = actualCount.Count;
-                Console.WriteLine($"Row {currentRow}, Col {dataColumn}: Center {center.CenterName}, Sewa {sewaType.SewaName}, Count {actualCount.Count}");
+                worksheet.Cell(insertRow, dataColumn).Value = actualCount.Count;
+                Console.WriteLine($"Row {insertRow}, Col {dataColumn}: Center {center.CenterName}, Sewa {sewaType.SewaName}, Count {actualCount.Count}");
               }
               else
               {
-                worksheet.Cell(currentRow, dataColumn).Value = string.Empty;
+                worksheet.Cell(insertRow, dataColumn).Value = string.Empty;
               }
-
               dataColumn++;
             }
 
-            currentRow++;
+            // Apply border to all cells in the new row (columns 2 to last dataColumn-1)
+            for (int col = 2; col < dataColumn; col++)
+            {
+              var cell = worksheet.Cell(insertRow, col);
+              var border = cell.Style.Border;
+              border.TopBorder = XLBorderStyleValues.Thin;
+              border.BottomBorder = XLBorderStyleValues.Thin;
+              border.LeftBorder = XLBorderStyleValues.Thin;
+              border.RightBorder = XLBorderStyleValues.Thin;
+            }
+
+            insertRow++;
             serialNumber++;
           }
 
-          Console.WriteLine($"Total rows filled: {currentRow - 5}");
+          // After writing all data, delete the next two rows after the last inserted row
+          worksheet.Row(insertRow).Delete();
+          worksheet.Row(insertRow).Delete();
+
+          // Then delete the original sample rows at row 5 and 6
+          worksheet.Row(5).Delete();
+          worksheet.Row(5).Delete();
+
+          Console.WriteLine($"Total rows filled: {insertRow - 7}");
           Console.WriteLine($"Verifying C2 value before save: {worksheet.Cell("C2").Value}");
           Console.WriteLine($"Verifying B5 value before save: {worksheet.Cell("B5").Value}");
 
@@ -305,6 +328,8 @@ namespace bhati_jatha_count_report.Controllers
               fileName);
           }
         }
+
+        // (Removed duplicate and misplaced code block)
       }
       catch (Exception ex)
       {
