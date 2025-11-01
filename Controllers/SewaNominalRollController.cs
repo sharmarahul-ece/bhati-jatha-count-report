@@ -31,7 +31,7 @@ public class SewaNominalRollController : Controller
 
     var results = await _sewaNominalRollService.Query(startDate, endDate, centerFilter, sewaTypeFilter);
 
-    var model = new bhati_jatha_count_report.ViewModels.SewaNominalRollImportViewModel
+    var model = new bhati_jatha_count_report.Models.ViewModels.SewaNominalRollImportViewModel
     {
       Centers = centers,
       SewaTypes = sewaTypes,
