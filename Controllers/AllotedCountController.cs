@@ -206,17 +206,9 @@ namespace bhati_jatha_count_report.Controllers
         var actualCounts = actualCountService?.GetAll().Where(x => x.Date.Date == selectedDate.Date).ToList()
           ?? new List<DailyActualCount>();
 
-        // Log for debugging
-        Console.WriteLine($"Selected Date: {selectedDate:yyyy-MM-dd}");
-        Console.WriteLine($"Total Centers: {centers.Count}");
-        Console.WriteLine($"Total Sewa Types: {sewaTypes.Count}");
-        Console.WriteLine($"Total Actual Counts for date: {actualCounts.Count}");
-
         // Filter centers that have at least one actual count for the date
         var centersWithData = centers.Where(c =>
           actualCounts.Any(ac => ac.CenterId == c.Id)).ToList();
-
-        Console.WriteLine($"Centers with data: {centersWithData.Count}");
 
         // Path to the Excel template
         var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates", "actual_counts_template.xlsx");
@@ -233,11 +225,8 @@ namespace bhati_jatha_count_report.Controllers
         {
           var worksheet = workbook.Worksheet(1); // Get the first worksheet
 
-          Console.WriteLine($"Worksheet name: {worksheet.Name}, Row count: {worksheet.RowsUsed().Count()}");
-
-          // Fill the date in cell C2
-          worksheet.Cell("C2").Value = selectedDate.ToString("dd/MM/yyyy");
-          Console.WriteLine($"Set date in C2: {worksheet.Cell("C2").Value}");
+          // Fill the date in cell B2
+          worksheet.Cell("B2").Value = selectedDate.ToString("dd/MM/yyyy");
 
           // Fill Sewa Type headers starting from E3
           int sewaTypeColumn = 5; // Column E
@@ -247,28 +236,30 @@ namespace bhati_jatha_count_report.Controllers
             sewaTypeColumn++;
           }
 
-          // Fill center data starting from row 7, inserting a new row for each center
+          // Start inserting data after the two sample rows (row 7)
           int insertRow = 7;
           int serialNumber = 1;
 
+          // For each center with data, insert a new row and populate it
           foreach (var center in centersWithData)
           {
             // Insert a new row at the current position (insertRow)
             worksheet.Row(insertRow).InsertRowsAbove(1);
 
-            // In columns R and S (18, 19), set formula =SUM(E:Q) for that row
+            // --- Set formulas for summary columns ---
+            // Columns R and S (18, 19): SUM of E:Q for this row
             worksheet.Cell(insertRow, 18).FormulaA1 = $"SUM(E{insertRow}:Q{insertRow})";
             worksheet.Cell(insertRow, 19).FormulaA1 = $"SUM(E{insertRow}:Q{insertRow})";
-            // In column T (20), set formula =R-S for that row
+            // Column T (20): Difference between R and S for this row
             worksheet.Cell(insertRow, 20).FormulaA1 = $"R{insertRow}-S{insertRow}";
 
-            // Write data to the newly inserted row
-            worksheet.Cell(insertRow, 2).Value = serialNumber;
-            worksheet.Cell(insertRow, 3).Value = center.CenterName;
-            worksheet.Cell(insertRow, 4).Value = center.CenterType;
+            // --- Fill in center details ---
+            worksheet.Cell(insertRow, 2).Value = serialNumber; // Serial Number
+            worksheet.Cell(insertRow, 3).Value = center.CenterName; // Center Name
+            worksheet.Cell(insertRow, 4).Value = center.CenterType; // Center Type
 
-            // Fill actual counts for each sewa type (starting from column E)
-            int dataColumn = 5; // Column E
+            // --- Fill actual counts for each sewa type (columns E to Q) ---
+            int dataColumn = 5; // Start at column E
             foreach (var sewaType in sewaTypes)
             {
               var actualCount = actualCounts.FirstOrDefault(ac =>
@@ -277,7 +268,6 @@ namespace bhati_jatha_count_report.Controllers
               if (actualCount != null)
               {
                 worksheet.Cell(insertRow, dataColumn).Value = actualCount.Count;
-                Console.WriteLine($"Row {insertRow}, Col {dataColumn}: Center {center.CenterName}, Sewa {sewaType.SewaName}, Count {actualCount.Count}");
               }
               else
               {
@@ -286,32 +276,30 @@ namespace bhati_jatha_count_report.Controllers
               dataColumn++;
             }
 
-            // Apply border to all cells in the new row (columns 2 to last dataColumn-1)
-            for (int col = 2; col < dataColumn; col++)
-            {
-              var cell = worksheet.Cell(insertRow, col);
-              var border = cell.Style.Border;
-              border.TopBorder = XLBorderStyleValues.Thin;
-              border.BottomBorder = XLBorderStyleValues.Thin;
-              border.LeftBorder = XLBorderStyleValues.Thin;
-              border.RightBorder = XLBorderStyleValues.Thin;
-            }
+            // --- Apply border to all cells in the new row (columns 2 to last dataColumn-1) ---
+            // for (int col = 2; col < dataColumn; col++)
+            // {
+            //   var cell = worksheet.Cell(insertRow, col);
+            //   var border = cell.Style.Border;
+            //   border.TopBorder = XLBorderStyleValues.Thin;
+            //   border.BottomBorder = XLBorderStyleValues.Thin;
+            //   border.LeftBorder = XLBorderStyleValues.Thin;
+            //   border.RightBorder = XLBorderStyleValues.Thin;
+            // }
 
+            // Move to the next row for the next center
             insertRow++;
             serialNumber++;
           }
 
-          // After writing all data, delete the next two rows after the last inserted row
+          // --- Clean up template/sample rows ---
+          // After writing all data, delete the next two rows after the last inserted row (these are template/sample rows)
           worksheet.Row(insertRow).Delete();
           worksheet.Row(insertRow).Delete();
 
           // Then delete the original sample rows at row 5 and 6
           worksheet.Row(5).Delete();
           worksheet.Row(5).Delete();
-
-          Console.WriteLine($"Total rows filled: {insertRow - 7}");
-          Console.WriteLine($"Verifying C2 value before save: {worksheet.Cell("C2").Value}");
-          Console.WriteLine($"Verifying B5 value before save: {worksheet.Cell("B5").Value}");
 
           // Save to memory stream and return as file
           using (var outputStream = new MemoryStream())
@@ -322,7 +310,7 @@ namespace bhati_jatha_count_report.Controllers
 
             Console.WriteLine($"Excel file generated successfully. Size: {fileBytes.Length} bytes");
 
-            var fileName = $"actual_counts_{selectedDate:yyyy-MM-dd}.xlsx";
+            var fileName = $"Bhati_Jatha_Actual_Report_{selectedDate:yyyy_MM_dd}.xlsx";
             return File(fileBytes,
               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
               fileName);
