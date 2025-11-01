@@ -11,11 +11,13 @@
         <input type="date" class="form-control" id="date" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="this.form.submit()" />
       </div>
     </div>
+    @Html.AntiForgeryToken()
   </form>
   <div class="mb-3">
-    <button type="button" class="btn btn-outline-secondary" onclick="copyPendingList()">
+    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="copyPendingList()">
       <i class="bi bi-clipboard"></i> Copy List
     </button>
+    <span id="copyAnim" style="display:none; color: green; font-weight: bold; transition: opacity 0.3s;">Copied!</span>
   </div>
   <div class="table-responsive d-flex justify-content-center">
     <table class="table table-bordered table-striped" style="max-width: 420px; min-width: 320px; font-size: 0.95rem; margin: 0 auto;">
@@ -59,22 +61,6 @@
           </tr>
         }
       </tbody>
-      <style>
-        .excluded-row {
-          background-color: #d4edda !important;
-          transition: background 0.2s;
-        }
-
-        .table td,
-        .table th {
-          padding: 0.35rem 0.5rem !important;
-        }
-
-        .toggle-exclude-btn {
-          font-size: 0.97rem;
-          padding: 0.25rem 0.5rem !important;
-        }
-      </style>
     </table>
     @if (!Model.Pending.Any())
     {
@@ -92,6 +78,22 @@ Pending Actual Count
 }
     </textarea>
   </div>
+  <style>
+    .excluded-row {
+      background-color: #d4edda !important;
+      transition: background 0.2s;
+    }
+
+    .table td,
+    .table th {
+      padding: 0.35rem 0.5rem !important;
+    }
+
+    .toggle-exclude-btn {
+      font-size: 0.97rem;
+      padding: 0.25rem 0.5rem !important;
+    }
+  </style>
   <script>
     function copyPendingList() {
       var textarea = document.getElementById('pendingListText');
@@ -99,10 +101,18 @@ Pending Actual Count
       textarea.select();
       document.execCommand('copy');
       textarea.classList.add('d-none');
-      alert('Pending list copied to clipboard!');
+      // Show animation/feedback (same as Index.cshtml)
+      var anim = document.getElementById('copyAnim');
+      if (anim) {
+        anim.style.display = 'inline';
+        anim.style.opacity = 1;
+        setTimeout(function () {
+          anim.style.opacity = 0;
+          setTimeout(function () {
+            anim.style.display = 'none';
+            anim.style.opacity = 1;
+          }, 400);
+        }, 1200);
+      }
     }
   </script>
-  @Html.AntiForgeryToken()
-</div>
-</script>
-</div>
