@@ -44,7 +44,8 @@ namespace bhati_jatha_count_report.Controllers
             NominalRollSewadarCount = match?.TotalSewadars,
             ManualSewadarCount = dac.ManualSewadarCount,
             CenterName = centerName,
-            SewaTypeName = sewaTypeName
+            SewaTypeName = sewaTypeName,
+            NominalRollRemarks = match?.Remarks
           };
         }).ToList(),
         Centers = centersList,
@@ -142,7 +143,8 @@ namespace bhati_jatha_count_report.Controllers
           NominalRollSewadarCount = match?.TotalSewadars,
           ManualSewadarCount = dac.ManualSewadarCount,
           CenterName = centerName,
-          SewaTypeName = sewaTypeName
+          SewaTypeName = sewaTypeName,
+          NominalRollRemarks = match?.Remarks
         };
       }).ToList();
       return Json(new { success = true, data = result });

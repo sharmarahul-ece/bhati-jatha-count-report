@@ -31,5 +31,8 @@ namespace bhati_jatha_count_report.Models.ViewModels
     // For display in the view
     public string? CenterName { get; set; }
     public string? SewaTypeName { get; set; }
+
+    // Remarks from the nominal roll (if any)
+    public string? NominalRollRemarks { get; set; }
   }
 }
