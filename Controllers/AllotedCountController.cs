@@ -87,7 +87,7 @@ namespace bhati_jatha_count_report.Controllers
       var centers = (await _centerService.GetAllCentersAsync()).ToList();
       var sewaTypes = (await _sewaTypeService.GetAllSewaTypesAsync()).ToList();
       var allotedCounts = _service.GetAll().ToList();
-      int selectedWeekDay = weekDay ?? 0;
+      int selectedWeekDay = weekDay ?? (int)DateTime.Now.DayOfWeek;
       var weekDays = System.Enum.GetValues(typeof(WeekDay))
         .Cast<WeekDay>()
         .Select(wd => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
