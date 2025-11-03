@@ -40,9 +40,7 @@
       <input type="date" id="filterDateTo" class="form-control form-control-sm d-inline-block w-auto align-middle" />
     </div>
     <div class="col-auto d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-success btn-sm align-middle" id="applyFiltersBtn">
-        <i class="bi bi-funnel"></i> Apply Filters
-      </button>
+      <!-- Apply Filters button removed: filters now apply automatically -->
       <button type="button" class="btn btn-primary btn-sm align-middle" data-bs-toggle="modal" data-bs-target="#dacModal" onclick="resetForm()">
         <i class="bi bi-plus-circle"></i> Add Record
       </button>
@@ -341,7 +339,13 @@
       filterData();
     });
 
-    document.getElementById('applyFiltersBtn').addEventListener('click', filterData);
+  // Remove Apply Filters button event listener
+
+  // Add change event listeners to filter inputs to auto-apply filters
+  document.getElementById('filterCenter').addEventListener('change', filterData);
+  document.getElementById('filterSewaType').addEventListener('change', filterData);
+  document.getElementById('filterDateFrom').addEventListener('change', filterData);
+  document.getElementById('filterDateTo').addEventListener('change', filterData);
     document.querySelector('#dacTable').addEventListener('click', function (e) {
       if (e.target.closest('.edit-dac-btn')) {
         const id = e.target.closest('.edit-dac-btn').dataset.id;
