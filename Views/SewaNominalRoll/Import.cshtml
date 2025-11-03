@@ -38,10 +38,10 @@
 
   <div class="row g-3 mb-3">
     <div class="col">
-      <form method="get" class="row g-2 align-items-end">
+      <form method="get" class="row g-2 align-items-end" id="filterForm">
         <div class="col-md-3">
           <label class="form-label">Center</label>
-          <select name="centerFilter" class="form-select form-select-sm">
+          <select name="centerFilter" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
             <option value="__all__">All</option>
             @foreach (var c in Model.Centers)
             {
@@ -51,7 +51,7 @@
         </div>
         <div class="col-md-3">
           <label class="form-label">Sewa Type</label>
-          <select name="sewaTypeFilter" class="form-select form-select-sm">
+          <select name="sewaTypeFilter" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
             <option value="__all__">All</option>
             @foreach (var s in Model.SewaTypes)
             {
@@ -62,13 +62,11 @@
         <div class="col-md-4">
           <label class="form-label">Date Range</label>
           <div class="d-flex">
-            <input type="date" name="startDate" class="form-control form-control-sm me-2" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
-            <input type="date" name="endDate" class="form-control form-control-sm" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+            <input type="date" name="startDate" class="form-control form-control-sm me-2" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" onchange="document.getElementById('filterForm').submit()" />
+            <input type="date" name="endDate" class="form-control form-control-sm" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" onchange="document.getElementById('filterForm').submit()" />
           </div>
         </div>
-        <div class="col-md-2">
-          <button class="btn btn-secondary btn-sm w-100">Filter</button>
-        </div>
+        @* Filter button removed, auto-submit on change *@
       </form>
     </div>
   </div>
