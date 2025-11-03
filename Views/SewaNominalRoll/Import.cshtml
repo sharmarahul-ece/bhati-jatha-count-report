@@ -23,58 +23,53 @@
     </div>
   }
 
-  <div class="row g-3">
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body">
-          <form method="post" enctype="multipart/form-data">
-            <div class="mb-3">
-              <label for="file" class="form-label">Select Excel File</label>
-              <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm">Import Data</button>
-          </form>
-        </div>
-      </div>
-    </div>
 
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-body">
-          <form method="get" class="row g-2 align-items-end">
-            <div class="col-md-4">
-              <label class="form-label">Center</label>
-              <select name="centerFilter" class="form-select">
-                <option value="__all__">All</option>
-                @foreach (var c in Model.Centers)
-                {
-                  <option value="@c" selected="@(Model.CenterFilter == c ? "selected" : null)">@c</option>
-                }
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Sewa Type</label>
-              <select name="sewaTypeFilter" class="form-select">
-                <option value="__all__">All</option>
-                @foreach (var s in Model.SewaTypes)
-                {
-                  <option value="@s" selected="@(Model.SewaTypeFilter == s ? "selected" : null)">@s</option>
-                }
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Date Range</label>
-              <div class="d-flex">
-                <input type="date" name="startDate" class="form-control me-2" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
-                <input type="date" name="endDate" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
-              </div>
-            </div>
-            <div class="col-12">
-              <button class="btn btn-secondary btn-sm">Filter</button>
-            </div>
-          </form>
+  <div class="row g-3 align-items-end mb-3">
+    <div class="col-auto flex-grow-1">
+      <form method="post" enctype="multipart/form-data" class="d-flex align-items-end gap-2">
+        <div>
+          <label for="file" class="form-label mb-0 me-2">Select Excel File</label>
+          <input type="file" class="form-control form-control-sm d-inline-block" style="width:auto;display:inline-block;" id="file" name="file" accept=".xlsx" required>
         </div>
-      </div>
+        <button type="submit" class="btn btn-primary btn-sm">Import Data</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">Center</label>
+          <select name="centerFilter" class="form-select form-select-sm">
+            <option value="__all__">All</option>
+            @foreach (var c in Model.Centers)
+            {
+              <option value="@c" selected="@(Model.CenterFilter == c ? "selected" : null)">@c</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Sewa Type</label>
+          <select name="sewaTypeFilter" class="form-select form-select-sm">
+            <option value="__all__">All</option>
+            @foreach (var s in Model.SewaTypes)
+            {
+              <option value="@s" selected="@(Model.SewaTypeFilter == s ? "selected" : null)">@s</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Date Range</label>
+          <div class="d-flex">
+            <input type="date" name="startDate" class="form-control form-control-sm me-2" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
+            <input type="date" name="endDate" class="form-control form-control-sm" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+          </div>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-secondary btn-sm w-100">Filter</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -85,21 +80,21 @@
           <thead class="table-light position-sticky" style="top:0; z-index:1;">
             <tr>
               <th>NominalRollToken</th>
-              <th>SewaDate</th>
+              <th>Sewa Date</th>
+              <th>Journey Date</th>
+              <th>Duration</th>
               @* <th>SewaName</th> *@
               @* <th>Department</th> *@
               @* <th>Zone</th> *@
-              <th>CentreName</th>
-              <th>JourneyDate</th>
-              <th>SewaDuration</th>
-              <th>Males</th>
-              <th>Females</th>
-              <th>TotalSewadars</th>
-              <th>SewaType</th>
-              <th>SewaStartTime</th>
+              <th>Centre Name</th>
+              <th>M</th>
+              <th>F</th>
+              <th>Total</th>
+              @* <th>SewaType</th> *@
               @* <th>InchargeName</th> *@
               @* <th>InchargeContact</th> *@
               <th>Remarks</th>
+              <th>Start Time</th>
               @* <th>SourceFile</th> *@
               @* <th>CreatedAt</th> *@
             </tr>
@@ -110,20 +105,20 @@
               <tr>
                 <td>@r.NominalRollToken</td>
                 <td>@(r.SewaDate == DateTime.MinValue ? "" : r.SewaDate.ToString("yyyy-MM-dd"))</td>
+                <td>@(r.JourneyDate == DateTime.MinValue ? "" : r.JourneyDate.ToString("yyyy-MM-dd"))</td>
+                <td>@r.SewaDuration</td>
                 @* <td>@r.SewaName</td> *@
                 @* <td>@r.Department</td> *@
                 @* <td>@r.Zone</td> *@
                 <td>@r.CentreName</td>
-                <td>@(r.JourneyDate == DateTime.MinValue ? "" : r.JourneyDate.ToString("yyyy-MM-dd"))</td>
-                <td>@r.SewaDuration</td>
                 <td>@r.Males</td>
                 <td>@r.Females</td>
                 <td>@r.TotalSewadars</td>
-                <td>@r.SewaType</td>
-                <td>@r.SewaStartTime</td>
+                @* <td>@r.SewaType</td> *@
                 @* <td>@r.InchargeName</td> *@
                 @* <td>@r.InchargeContact</td> *@
                 <td>@r.Remarks</td>
+                <td>@r.SewaStartTime</td>
                 @* <td>@r.SourceFileName</td> *@
                 @* <td>@(r.CreatedAt == DateTime.MinValue ? "" : r.CreatedAt.ToString("yyyy-MM-dd HH:mm"))</td> *@
               </tr>
