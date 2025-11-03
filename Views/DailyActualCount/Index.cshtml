@@ -94,6 +94,7 @@
     <table class="table table-sm table-striped table-hover" id="dacTable">
       <thead class="table-light">
         <tr>
+          <th>#</th>
           <th>Date</th>
           <th>Center</th>
           <th>Sewa Type</th>
@@ -200,7 +201,7 @@
       const tbody = document.getElementById('dacTableBody');
       tbody.innerHTML = '';
 
-      data.forEach(item => {
+      data.forEach((item, idx) => {
         // Calculate the displayed SRS Count (from nominal roll or manual override)
         const displaySewadarCount = item.nominalRollFound
           ? (item.nominalRollSewadarCount ?? 0)
@@ -247,8 +248,7 @@
         if (item.nominalRollFound) {
           srsCountCell = `<span>${item.nominalRollSewadarCount ?? '-'}</span>`;
         } else {
-          @* srsCountCell = `<input type='number' class='form-control form-control-sm manual-sewadar-count-input' data-id='${item.id}' value='${item.manualSewadarCount ?? ''}' min='0' style='width:90px;${sewadarCountCellStyle}' />`; *@
-            srsCountCell = `<span>${item.manualSewadarCount ?? '-'}</span>`;
+          srsCountCell = `<span>${item.manualSewadarCount ?? '-'}</span>`;
         }
 
         // Build the row HTML
@@ -256,23 +256,24 @@
         tr.setAttribute('data-id', item.id);
         if (rowHighlight) tr.setAttribute('style', rowHighlight);
         tr.innerHTML = `
-                      <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
-                      <td>${centerName}</td>
-                      <td>${sewaTypeName}</td>
-                      <td style='${countCellStyle}'>${item.count ?? '-'}</td>
-                      <td style='${countCellStyle}'>${srsCountCell}</td>
-                      <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
-                      <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
-                      <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
-                      <td>
-                        <button class="btn btn-sm btn-primary me-2 edit-dac-btn" data-id="${item.id}">
-                          <i class="bi bi-pencil"></i> Edit
-                        </button>
-                        <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}">
-                          <i class="bi bi-trash"></i> Delete
-                        </button>
-                      </td>
-                    `;
+                          <td>${idx + 1}</td>
+                          <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
+                          <td>${centerName}</td>
+                          <td>${sewaTypeName}</td>
+                          <td style='${countCellStyle}'>${item.count ?? '-'}</td>
+                          <td style='${countCellStyle}'>${srsCountCell}</td>
+                          <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
+                          <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
+                          <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
+                          <td>
+                            <button class="btn btn-sm btn-primary me-1 edit-dac-btn" data-id="${item.id}" title="Edit">
+                              <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}" title="Delete">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </td>
+                        `;
         tbody.appendChild(tr);
       });
 
