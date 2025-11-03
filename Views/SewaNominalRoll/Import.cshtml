@@ -49,24 +49,24 @@
             }
           </select>
         </div>
-        <div class="col-md-3">
-          <label class="form-label">Sewa Type</label>
-          <select name="sewaTypeFilter" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
-            <option value="__all__">All</option>
-            @foreach (var s in Model.SewaTypes)
-            {
-              <option value="@s" selected="@(Model.SewaTypeFilter == s ? "selected" : null)">@s</option>
-            }
-          </select>
-        </div>
+        @* Sewa Type filter removed *@
         <div class="col-md-4">
           <label class="form-label">Date Range</label>
           <div class="d-flex">
             <input type="date" name="startDate" class="form-control form-control-sm me-2" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" onchange="document.getElementById('filterForm').submit()" />
-            <input type="date" name="endDate" class="form-control form-control-sm" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" onchange="document.getElementById('filterForm').submit()" />
+            <input type="date" name="endDate" class="form-control form-control-sm me-2" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" onchange="document.getElementById('filterForm').submit()" />
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearFilters()">Clear</button>
           </div>
         </div>
-        @* Filter button removed, auto-submit on change *@
+        <script>
+          function clearFilters() {
+            var form = document.getElementById('filterForm');
+            form.centerFilter.value = "__all__";
+            form.startDate.value = "";
+            form.endDate.value = "";
+            form.submit();
+          }
+        </script>
       </form>
     </div>
   </div>
@@ -98,7 +98,7 @@
             </tr>
           </thead>
           <tbody>
-            @foreach (var r in Model.Results)
+            @foreach (var r in Model.Results.OrderBy(r => r.CentreName))
             {
               <tr>
                 <td>@r.NominalRollToken</td>
