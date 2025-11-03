@@ -29,7 +29,7 @@
         </tr>
       </thead>
       <tbody>
-        @foreach (var pending in Model.Pending)
+        @foreach (var pending in Model.Pending.OrderBy(p => p.CenterName, System.StringComparer.OrdinalIgnoreCase))
         {
           var btnClass = pending.IsExcluded ? "excluded-row" : "";
           <tr>
