@@ -63,13 +63,7 @@
   <form class="row row-cols-lg-auto g-2 align-items-center mb-3" onsubmit="return false;">
     <div class="col-auto">
       <label class="form-label mb-0 me-2" for="filterCenter">Center</label>
-      <select id="filterCenter" class="form-select form-select-sm d-inline-block w-auto align-middle">
-        <option value="">All</option>
-        @foreach (var c in Model.Centers)
-        {
-          <option value="@c.Id">@c.CenterName</option>
-        }
-      </select>
+      <input type="text" id="filterCenter" class="form-control form-control-sm d-inline-block w-auto align-middle" placeholder="Type center name..." autocomplete="off" />
     </div>
     <div class="col-auto">
       <label class="form-label mb-0 me-2" for="filterSewaType">Sewa Type</label>
@@ -276,25 +270,25 @@
         tr.setAttribute('data-id', item.id);
         if (rowHighlight) tr.setAttribute('style', rowHighlight);
         tr.innerHTML = `
-                                  <td>${idx + 1}</td>
-                                  <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
-                                  <td>${centerName}</td>
-                                  <td>${srsCenter}</td>
-                                  <td>${sewaTypeName}</td>
-                                  <td style='${countCellStyle}'>${item.count ?? '-'}</td>
-                                  <td style='${countCellStyle}'>${srsCountCell}</td>
-                                  <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
-                                  <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
-                                  <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
-                                  <td>
-                                    <button class="btn btn-sm btn-primary me-1 edit-dac-btn" data-id="${item.id}" title="Edit">
-                                      <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}" title="Delete">
-                                      <i class="bi bi-trash"></i>
-                                    </button>
-                                  </td>
-                                `;
+                                    <td>${idx + 1}</td>
+                                    <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
+                                    <td>${centerName}</td>
+                                    <td>${srsCenter}</td>
+                                    <td>${sewaTypeName}</td>
+                                    <td style='${countCellStyle}'>${item.count ?? '-'}</td>
+                                    <td style='${countCellStyle}'>${srsCountCell}</td>
+                                    <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
+                                    <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
+                                    <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
+                                    <td>
+                                      <button class="btn btn-sm btn-primary me-1 edit-dac-btn" data-id="${item.id}" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                      </button>
+                                      <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                      </button>
+                                    </td>
+                                  `;
         tbody.appendChild(tr);
       });
 
@@ -327,7 +321,7 @@
     }
 
     function filterData() {
-      const centerId = document.getElementById('filterCenter').value;
+      const centerText = document.getElementById('filterCenter').value.trim().toLowerCase();
       const sewaTypeId = document.getElementById('filterSewaType').value;
       const dateFrom = document.getElementById('filterDateFrom').value;
       const dateTo = document.getElementById('filterDateTo').value;
@@ -335,15 +329,18 @@
       let url = '/DailyActualCount/GetFiltered?';
       if (dateFrom) url += `fromDate=${dateFrom}&`;
       if (dateTo) url += `toDate=${dateTo}&`;
-      if (centerId) url += `centerId=${centerId}&`;
       if (sewaTypeId) url += `sewaTypeId=${sewaTypeId}`;
 
       fetch(url)
         .then(r => r.json())
         .then(res => {
           if (res.success) {
-            dacData = res.data; // Update the local data
-            renderTable(res.data);
+            let filtered = res.data;
+            if (centerText) {
+              filtered = filtered.filter(x => (x.centerName || '').toLowerCase().includes(centerText));
+            }
+            dacData = filtered; // Update the local data
+            renderTable(filtered);
           } else {
             alert('Error loading filtered data');
           }
@@ -372,7 +369,7 @@
     // Remove Apply Filters button event listener
 
     // Add change event listeners to filter inputs to auto-apply filters
-    document.getElementById('filterCenter').addEventListener('change', filterData);
+    document.getElementById('filterCenter').addEventListener('input', filterData);
     document.getElementById('filterSewaType').addEventListener('change', filterData);
     document.getElementById('filterDateFrom').addEventListener('change', filterData);
     document.getElementById('filterDateTo').addEventListener('change', filterData);
