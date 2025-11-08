@@ -40,14 +40,8 @@
     <div class="col">
       <form method="get" class="row g-2 align-items-end" id="filterForm">
         <div class="col-md-3">
-          <label class="form-label">Center</label>
-          <select name="centerFilter" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
-            <option value="__all__">All</option>
-            @foreach (var c in Model.Centers)
-            {
-              <option value="@c" selected="@(Model.CenterFilter == c ? "selected" : null)">@c</option>
-            }
-          </select>
+          <label class="form-label" for="centerFilter">Center</label>
+          <input type="text" name="centerFilter" id="centerFilter" class="form-control form-control-sm" placeholder="Type center name..." value="@Model.CenterFilter" autocomplete="off" />
         </div>
         @* Sewa Type filter removed *@
         <div class="col-md-4">
@@ -60,11 +54,37 @@
         </div>
         <script>
           function clearFilters() {
-            var form = document.getElementById('filterForm');
-            form.centerFilter.value = "__all__";
-            form.startDate.value = "";
-            form.endDate.value = "";
-            form.submit();
+            document.getElementById('centerFilter').value = '';
+            document.querySelector('input[name="startDate"]').value = '';
+            document.querySelector('input[name="endDate"]').value = '';
+            filterTable();
+          }
+
+          // Async filter for center (no page reload)
+          document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('centerFilter').addEventListener('input', filterTable);
+          });
+
+          function filterTable() {
+            const filter = document.getElementById('centerFilter').value.trim().toLowerCase();
+            const rows = document.querySelectorAll('table tbody tr');
+            // Find the index of the Centre Name column
+            const ths = document.querySelectorAll('table thead th');
+            let centerIdx = -1;
+            ths.forEach((th, idx) => {
+              if (th.textContent.trim().toLowerCase() === 'centre name') centerIdx = idx;
+            });
+            if (centerIdx === -1) return;
+            rows.forEach(row => {
+              const tds = row.querySelectorAll('td');
+              if (tds.length <= centerIdx) return;
+              const centerText = tds[centerIdx].textContent.trim().toLowerCase();
+              if (!filter || centerText.includes(filter)) {
+                row.style.display = '';
+              } else {
+                row.style.display = 'none';
+              }
+            });
           }
         </script>
       </form>
