@@ -90,6 +90,15 @@
       <input type="date" id="filterDateTo" class="form-control form-control-sm d-inline-block w-auto align-middle" />
     </div>
   </form>
+  <!-- Totals just above the table -->
+  <div class="row mb-3" id="totalsRow">
+    <div class="col-auto">
+      <span class="fw-bold">Total Count:</span> <span id="totalCount">0</span>
+    </div>
+    <div class="col-auto">
+      <span class="fw-bold">Total SRS Count:</span> <span id="totalSrsCount">0</span>
+    </div>
+  </div>
   <div class="table-responsive">
     <table class="table table-sm table-striped table-hover" id="dacTable">
       <thead class="table-light">
@@ -202,11 +211,18 @@
       const tbody = document.getElementById('dacTableBody');
       tbody.innerHTML = '';
 
+      // Calculate totals
+      let totalCount = 0;
+      let totalSrsCount = 0;
+
       data.forEach((item, idx) => {
         // Calculate the displayed SRS Count (from nominal roll or manual override)
         const displaySewadarCount = item.nominalRollFound
           ? (item.nominalRollSewadarCount ?? 0)
           : (item.manualSewadarCount ?? 0);
+
+        totalCount += item.count ?? 0;
+        totalSrsCount += displaySewadarCount;
 
         // Determine if there is a mismatch between Count and SRS Count
         const isMismatch = (item.count ?? 0) !== displaySewadarCount;
@@ -260,27 +276,43 @@
         tr.setAttribute('data-id', item.id);
         if (rowHighlight) tr.setAttribute('style', rowHighlight);
         tr.innerHTML = `
-                            <td>${idx + 1}</td>
-                            <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
-                            <td>${centerName}</td>
-                            <td>${srsCenter}</td>
-                            <td>${sewaTypeName}</td>
-                            <td style='${countCellStyle}'>${item.count ?? '-'}</td>
-                            <td style='${countCellStyle}'>${srsCountCell}</td>
-                            <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
-                            <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
-                            <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
-                            <td>
-                              <button class="btn btn-sm btn-primary me-1 edit-dac-btn" data-id="${item.id}" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                              </button>
-                              <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}" title="Delete">
-                                <i class="bi bi-trash"></i>
-                              </button>
-                            </td>
-                          `;
+                                  <td>${idx + 1}</td>
+                                  <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
+                                  <td>${centerName}</td>
+                                  <td>${srsCenter}</td>
+                                  <td>${sewaTypeName}</td>
+                                  <td style='${countCellStyle}'>${item.count ?? '-'}</td>
+                                  <td style='${countCellStyle}'>${srsCountCell}</td>
+                                  <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
+                                  <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
+                                  <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
+                                  <td>
+                                    <button class="btn btn-sm btn-primary me-1 edit-dac-btn" data-id="${item.id}" title="Edit">
+                                      <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}" title="Delete">
+                                      <i class="bi bi-trash"></i>
+                                    </button>
+                                  </td>
+                                `;
         tbody.appendChild(tr);
       });
+
+      // Update totals in the UI
+      const totalCountElem = document.getElementById('totalCount');
+      const totalSrsCountElem = document.getElementById('totalSrsCount');
+      const totalsRow = document.getElementById('totalsRow');
+      totalCountElem.textContent = totalCount;
+      totalSrsCountElem.textContent = totalSrsCount;
+
+      // Highlight: green if matching, red if not
+      if (totalCount === totalSrsCount) {
+        totalsRow.style.background = 'linear-gradient(90deg, #eaffea 0%, #d4f5d4 100%)';
+        totalsRow.style.transition = 'background 0.5s';
+      } else {
+        totalsRow.style.background = 'linear-gradient(90deg, #ffeaea 0%, #ffd6d6 100%)';
+        totalsRow.style.transition = 'background 0.5s';
+      }
 
       // Add event listeners for manual override inputs
       document.querySelectorAll('.manual-sewadar-count-input').forEach(input => {
