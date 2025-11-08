@@ -97,6 +97,7 @@
           <th>#</th>
           <th>Date</th>
           <th>Center</th>
+          <th>SRS Center</th>
           <th>Sewa Type</th>
           <th>Count</th>
           <th>SRS Count</th>
@@ -224,6 +225,9 @@
           if (c) centerName = c.centerName;
         }
 
+        // SRS Center: use SrsCenter property from backend
+        let srsCenter = item.srsCenter ?? '-';
+
         let sewaTypeName = '-';
         if (item.sewaTypeName) {
           sewaTypeName = item.sewaTypeName;
@@ -256,24 +260,25 @@
         tr.setAttribute('data-id', item.id);
         if (rowHighlight) tr.setAttribute('style', rowHighlight);
         tr.innerHTML = `
-                          <td>${idx + 1}</td>
-                          <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
-                          <td>${centerName}</td>
-                          <td>${sewaTypeName}</td>
-                          <td style='${countCellStyle}'>${item.count ?? '-'}</td>
-                          <td style='${countCellStyle}'>${srsCountCell}</td>
-                          <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
-                          <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
-                          <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
-                          <td>
-                            <button class="btn btn-sm btn-primary me-1 edit-dac-btn" data-id="${item.id}" title="Edit">
-                              <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}" title="Delete">
-                              <i class="bi bi-trash"></i>
-                            </button>
-                          </td>
-                        `;
+                            <td>${idx + 1}</td>
+                            <td>${item.date ? item.date.substring(0, 10) : '-'}</td>
+                            <td>${centerName}</td>
+                            <td>${srsCenter}</td>
+                            <td>${sewaTypeName}</td>
+                            <td style='${countCellStyle}'>${item.count ?? '-'}</td>
+                            <td style='${countCellStyle}'>${srsCountCell}</td>
+                            <td style='${nominalRollTokenCellStyle}'>${item.nominalRollToken ?? '-'}</td>
+                            <td class='d-none' style='${foundCellStyle}'>${foundText}</td>
+                            <td style='${nominalRollTokenCellStyle}'>${item.nominalRollRemarks ? item.nominalRollRemarks : ''}</td>
+                            <td>
+                              <button class="btn btn-sm btn-primary me-1 edit-dac-btn" data-id="${item.id}" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                              <button class="btn btn-sm btn-danger delete-dac-btn" data-id="${item.id}" title="Delete">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </td>
+                          `;
         tbody.appendChild(tr);
       });
 

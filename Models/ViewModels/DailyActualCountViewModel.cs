@@ -34,5 +34,8 @@ namespace bhati_jatha_count_report.Models.ViewModels
 
     // Remarks from the nominal roll (if any)
     public string? NominalRollRemarks { get; set; }
+
+    // SRS Center (CentreName from SewaNominalRoll)
+    public string? SrsCenter { get; set; }
   }
 }

@@ -32,6 +32,7 @@ namespace bhati_jatha_count_report.Controllers
           var match = nominalRolls.FirstOrDefault(nr => nr.NominalRollToken == dac.NominalRollToken);
           var centerName = centersList.FirstOrDefault(c => c.Id == dac.CenterId)?.CenterName;
           var sewaTypeName = sewaTypesList.FirstOrDefault(s => s.Id == dac.SewaTypeId)?.SewaName;
+          var srsCenter = match?.CentreName;
           return new Models.ViewModels.DailyActualCountViewModel
           {
             Id = dac.Id,
@@ -45,7 +46,8 @@ namespace bhati_jatha_count_report.Controllers
             ManualSewadarCount = dac.ManualSewadarCount,
             CenterName = centerName,
             SewaTypeName = sewaTypeName,
-            NominalRollRemarks = match?.Remarks
+            NominalRollRemarks = match?.Remarks,
+            SrsCenter = srsCenter
           };
         }).ToList(),
         Centers = centersList,
@@ -131,6 +133,7 @@ namespace bhati_jatha_count_report.Controllers
         var match = nominalRolls.FirstOrDefault(nr => nr.NominalRollToken == dac.NominalRollToken);
         var centerName = centersList.FirstOrDefault(c => c.Id == dac.CenterId)?.CenterName;
         var sewaTypeName = sewaTypesList.FirstOrDefault(s => s.Id == dac.SewaTypeId)?.SewaName;
+        var srsCenter = match?.CentreName;
         return new Models.ViewModels.DailyActualCountViewModel
         {
           Id = dac.Id,
@@ -144,7 +147,8 @@ namespace bhati_jatha_count_report.Controllers
           ManualSewadarCount = dac.ManualSewadarCount,
           CenterName = centerName,
           SewaTypeName = sewaTypeName,
-          NominalRollRemarks = match?.Remarks
+          NominalRollRemarks = match?.Remarks,
+          SrsCenter = srsCenter
         };
       }).ToList();
       return Json(new { success = true, data = result });
