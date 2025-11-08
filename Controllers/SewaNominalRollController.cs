@@ -29,7 +29,19 @@ public class SewaNominalRollController : Controller
     var sewaTypes = (await _sewaNominalRollService.GetDistinctSewaTypesAsync()).ToList();
     var sourceFiles = (await _sewaNominalRollService.GetDistinctSourceFilesAsync()).ToList();
 
-    var results = await _sewaNominalRollService.Query(startDate, endDate, centerFilter, sewaTypeFilter);
+    var results = (await _sewaNominalRollService.Query(startDate, endDate, centerFilter, sewaTypeFilter)).ToList();
+
+    // Get DailyActualCountService from DI
+    var actualCountService = HttpContext.RequestServices.GetService(typeof(IDailyActualCountService)) as IDailyActualCountService;
+    var allActualCounts = actualCountService?.GetAll() ?? new List<bhati_jatha_count_report.Models.Entities.DailyActualCount>();
+
+    // Build set of NominalRollTokens to highlight (where token/date match)
+    var highlightTokens = new HashSet<string>(
+      results
+        .Where(r => !string.IsNullOrEmpty(r.NominalRollToken) && r.SewaDate != DateTime.MinValue)
+        .Where(r => allActualCounts.Any(a => a.NominalRollToken == r.NominalRollToken && a.Date.Date == r.SewaDate.Date))
+        .Select(r => r.NominalRollToken!)
+    );
 
     var model = new bhati_jatha_count_report.Models.ViewModels.SewaNominalRollImportViewModel
     {
@@ -39,10 +51,10 @@ public class SewaNominalRollController : Controller
       SewaTypeFilter = sewaTypeFilter,
       StartDate = startDate,
       EndDate = endDate,
-      Results = results
+      Results = results,
+      SourceFiles = sourceFiles,
+      HighlightedTokens = highlightTokens
     };
-
-    model.SourceFiles = sourceFiles;
 
     return View(model);
   }

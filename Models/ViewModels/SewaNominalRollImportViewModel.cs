@@ -9,6 +9,9 @@ public class SewaNominalRollImportViewModel
   public List<string> SewaTypes { get; set; } = new List<string>();
   public List<string> SourceFiles { get; set; } = new List<string>();
 
+  // List of NominalRollTokens to highlight (present in DailyActualCount for same date)
+  public HashSet<string> HighlightedTokens { get; set; } = new HashSet<string>();
+
   // Filters
   public string? CenterFilter { get; set; }
   public string? SewaTypeFilter { get; set; }

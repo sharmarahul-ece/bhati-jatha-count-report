@@ -128,7 +128,8 @@
             }
             @foreach (var r in Model.Results.OrderBy(r => r.CentreName))
             {
-              <tr>
+              var highlight = Model.HighlightedTokens.Contains(r.NominalRollToken ?? "");
+              <tr class="@(highlight ? "table-success" : "")">
                 <td>@sn</td>
                 <td>@r.NominalRollToken</td>
                 <td>@(r.SewaDate == DateTime.MinValue ? "" : r.SewaDate.ToString("yyyy-MM-dd"))</td>
