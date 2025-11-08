@@ -74,10 +74,15 @@ namespace bhati_jatha_count_report.Controllers
       if (model.Id == 0)
       {
         // Check for duplicate (Date, CenterId, SewaTypeId)
-        var duplicate = _service.GetAll().Any(x => x.Date.Date == model.Date.Date && x.CenterId == model.CenterId && x.SewaTypeId == model.SewaTypeId);
+        var duplicate = _service.GetAll().Any(x =>
+          x.Date.Date == model.Date.Date &&
+          x.CenterId == model.CenterId &&
+          x.SewaTypeId == model.SewaTypeId &&
+          (x.NominalRollToken ?? "") == (model.NominalRollToken ?? "")
+        );
         if (duplicate)
         {
-          return Json(new { success = false, message = "Duplicate entry detected for the same Date, Center, and Sewa Type." });
+          return Json(new { success = false, message = "Duplicate entry detected for the same Date, Center, Sewa Type, and Nominal Roll Token." });
         }
         var entity = new DailyActualCount
         {
